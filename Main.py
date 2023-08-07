@@ -57,17 +57,21 @@ from PyQt5.QtWidgets import QApplication, QFileDialog, QMainWindow, QMessageBox,
 from standards_spider import *
 from UI.res_rc import *
 
-USER = ''
-UID = 0
 INI_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.ini")
 DATABASE_PATH = r'.\Database\users.db'
-STATES = []
+LOGIN_SETTINGS = []
+UID = ''
+USER = ''
+PROVINCE_CODE = []
 
 def load_setting():
-    global STATES
+    global LOGIN_SETTINGS, PROVINCE_CODE
     cf = ConfigParser()
-    cf.read('monitor_config.ini', encoding='utf-8')
-    STATES = cf.options('省级行政区划')
+    cf.read(INI_PATH, encoding='utf-8')
+    LOGIN_SETTINGS = cf.items('LOGIN_SETTINGS')
+    UID = LOGIN_SETTINGS[0][1]
+    USER = LOGIN_SETTINGS[1][1]
+    PROVINCE_CODE = cf.items('PROVINCE_CODE')
 
 class LoginWindow(QMainWindow):
     def __init__(self):
@@ -194,6 +198,7 @@ class LoginWindow(QMainWindow):
 
 class MainWindow(QMainWindow):
     def __init__(self):
+        global PROVINCE_CODE
         super().__init__()
         self.ui = uic.loadUi(r'.\UI\Main.ui', self)
         # self.ui = Ui_MainWindow()
@@ -212,7 +217,7 @@ class MainWindow(QMainWindow):
         # page 2
         self.ui.comboBox_1.currentIndexChanged.connect(self.standard_CB1)
         self.ui.comboBox_2.hide()
-        self.ui.comboBox_2.addItems(['不限'] + STATES)
+        self.ui.comboBox_2.addItems(['不限'] + [x[0] for x in PROVINCE_CODE])
         # self.ui.comboBox_2.currentIndexChanged.connect(self.standard_CB2)
         self.ui.pushButton_Search.clicked.connect(self.search)
         self.ui.tableWidget.resizeColumnsToContents()
@@ -256,14 +261,47 @@ class MainWindow(QMainWindow):
         #                 cur.execute(f"insert into standards values('{i[0]}','{i[1]}','{i[2]}','{i[3]}')")
         #             except:
         #                 cur.execute(f"update standards set StandardNames='{i[1]}',StartDate='{i[2]}', Status='{i[3]}' where StandardNumbers='{i[0]}'")
+        pattarn = p1 = p2 = p3 = ''
         if level == '国标':
             pattarn = 'GB'
-        elif state == '北京市':
-            pattarn = 'DB11'
+        elif level == '地标':
+            pattarn = 'DB'
+            if state != '不限':
+                pattarn += [x[1] for x in PROVINCE_CODE if x[0] == state][0]
+        elif level == '行标':
+            pattarn = ''
+        elif level == '团标':
+            pattarn = ''
         else:
             pattarn = ''
-        conn.create_function("REGEXP", 2, regexp)
-        cur.execute(f"SELECT * FROM standards WHERE StandardNumbers REGEXP '^{pattarn}' AND Status='{status}' AND (StandardNumbers  LIKE '%{self.ui.lineEdit_Search.text()}%' OR StandardNames LIKE '%{self.ui.lineEdit_Search.text()}%')" )
+        if pattarn:
+            p1 = f"StandardNumbers REGEXP '^{pattarn}'"
+        if status != '不限':
+            p2 = f"Status='{status}'"
+        if self.ui.lineEdit_Search.text():
+            p3 = f"(StandardNumbers  LIKE '%{self.ui.lineEdit_Search.text()}%' OR StandardNames LIKE '%{self.ui.lineEdit_Search.text()}%')"
+        # print(pattarn)
+        if p1:
+            pattarn = p1
+            if p2:
+                pattarn += ' AND ' + p2
+            if p3:
+                pattarn += ' AND ' +p3
+        elif p2:
+            pattarn = p2
+            if p3:
+                pattarn += ' AND ' +p3
+        elif p3:
+            pattarn = p3
+        else:
+            pattarn = ''
+        # print(pattarn)
+        if pattarn:
+            conn.create_function("REGEXP", 2, regexp)
+            # print(f"SELECT * FROM standards WHERE {pattarn}")
+            cur.execute(f"SELECT * FROM standards WHERE {pattarn}" )
+        else:
+            cur.execute("SELECT * FROM standards" )
         data = cur.fetchall()
         print(data)
         conn.commit()
@@ -343,6 +381,9 @@ class MainWindow(QMainWindow):
             self.ui.stackedWidget_2.setCurrentIndex(1)
             self.ui.label_MWrong.setText('输入不完整！')
 
+def save_seeting():
+    print('save setting')
+    pass
 
 if __name__ == "__main__":
     load_setting()
