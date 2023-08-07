@@ -345,6 +345,7 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
+    load_setting()
     app = QApplication(sys.argv)
     # win = LoginWindow()
     win = MainWindow()
