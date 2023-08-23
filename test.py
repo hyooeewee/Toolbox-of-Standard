@@ -1,4 +1,14 @@
+#coding:utf-8
+import random
+import urllib
+import ssl
 import requests
+import chardet
+from bs4 import BeautifulSoup
+from requests.exceptions import RequestException
+import re
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 url = 'http://www.ccsn.org.cn/Zbbz/Show.aspx?Guid=fd20cb8b-3b1d-4dd5-90b1-cf20e22ac9f7'
 headers = {
@@ -14,7 +24,15 @@ headers = {
     'Upgrade-Insecure-Requests':'1',
     'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.0.0'
 }
+
+
+
 if __name__ == "__main__":
     # T = requests.get(url).text
     # print(T)
-    print(str('爱你'.encode('GB2312')).split("'")[1].replace(r'\x', '%'))
+    # print(str('爱你'.encode('GB2312')).split("'")[1].replace(r'\x', '%'))
+    # print(BeiJing_get_all())
+    ssl._create_default_https_context = ssl._create_unverified_context
+    url = "https://zfcxjs.tj.gov.cn/ztzl_70/bzgf/xxbz/xxbzgf/"
+    data = requests.get(url)
+    print(data.status_code)

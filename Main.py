@@ -52,12 +52,14 @@ from configparser import ConfigParser
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor, QIcon, QMoveEvent
-from PyQt5.QtWidgets import QApplication, QFileDialog, QMainWindow, QMessageBox, QPushButton, QTableWidgetItem
+from PyQt5.QtWidgets import (QApplication, QFileDialog, QMainWindow,
+                             QMessageBox, QPushButton, QTableWidgetItem)
 
 from standards_spider import *
 from UI.res_rc import *
-
-INI_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.ini")
+# from UI.LoginUi import Ui_LoginWindow
+INI_PATH = os.path.join(os.getcwd(), "config.ini")
+# INI_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.ini")
 DATABASE_PATH = r'.\Database\users.db'
 LOGIN_SETTINGS = []
 UID = ''
@@ -254,13 +256,6 @@ class MainWindow(QMainWindow):
         cur = conn.cursor()
         # if state in ['不限']:
         #     # QMessageBox.warning(self, "提示", "查询中...")
-        #     data = csres_get(self.ui.lineEdit_Search.text())
-        #     if data:
-        #         for i in data:
-        #             try:
-        #                 cur.execute(f"insert into standards values('{i[0]}','{i[1]}','{i[2]}','{i[3]}')")
-        #             except:
-        #                 cur.execute(f"update standards set StandardNames='{i[1]}',StartDate='{i[2]}', Status='{i[3]}' where StandardNumbers='{i[0]}'")
         pattarn = p1 = p2 = p3 = ''
         if level == '国标':
             pattarn = 'GB'
@@ -286,11 +281,11 @@ class MainWindow(QMainWindow):
             if p2:
                 pattarn += ' AND ' + p2
             if p3:
-                pattarn += ' AND ' +p3
+                pattarn += ' AND ' + p3
         elif p2:
             pattarn = p2
             if p3:
-                pattarn += ' AND ' +p3
+                pattarn += ' AND ' + p3
         elif p3:
             pattarn = p3
         else:
@@ -303,7 +298,7 @@ class MainWindow(QMainWindow):
         else:
             cur.execute("SELECT * FROM standards" )
         data = cur.fetchall()
-        print(data)
+        # print(data)
         conn.commit()
         conn.close()
         y = len(data)
@@ -334,7 +329,20 @@ class MainWindow(QMainWindow):
          
         
     def export(self):
-        print('在写了在写了')
+        data = DB_data_get.SiChuan()
+        data += DB_data_get.BeiJing()
+        # data += DB_data_get.TianJin()
+        # data = csres_get(self.ui.lineEdit_Search.text())
+        if data:
+            conn = sqlite3.connect(DATABASE_PATH)
+            cur = conn.cursor()
+            for i in data:
+                try:
+                    cur.execute(f"insert into standards values('{i[0]}','{i[1]}','{i[2]}','{i[3]}','{i[4]}','{i[5]}')")
+                except:
+                    cur.execute(f"update standards set StandardNames='{i[1]}',StartDate='{i[2]}', EndDate='{i[3]}',Status='{i[4]}',DownloadLinks='{i[5]}' where StandardNumbers='{i[0]}'")
+            conn.commit()
+            conn.close()
 
     def select_file1(self):
         # 调用QFileDialog.getOpenFileName方法，弹出文件选择窗口
@@ -381,13 +389,17 @@ class MainWindow(QMainWindow):
             self.ui.stackedWidget_2.setCurrentIndex(1)
             self.ui.label_MWrong.setText('输入不完整！')
 
-def save_seeting():
+def save_setting():
     print('save setting')
+    pass
+
+def load_json():
     pass
 
 if __name__ == "__main__":
     load_setting()
+    load_json()
     app = QApplication(sys.argv)
-    # win = LoginWindow()
-    win = MainWindow()
+    win = LoginWindow()
+    # win = MainWindow()
     sys.exit(app.exec_())

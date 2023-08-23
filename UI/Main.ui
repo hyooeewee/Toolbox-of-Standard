@@ -640,7 +640,17 @@ border-radius: 5px;</string>
                       </column>
                       <column>
                        <property name="text">
+                        <string>作废日期</string>
+                       </property>
+                      </column>
+                      <column>
+                       <property name="text">
                         <string>执行状态</string>
+                       </property>
+                      </column>
+                      <column>
+                       <property name="text">
+                        <string>下载链接</string>
                        </property>
                       </column>
                      </widget>
@@ -664,7 +674,7 @@ border-radius: 5px;</string>
 border: none;</string>
                       </property>
                       <property name="text">
-                       <string>导出到excel</string>
+                       <string>更新数据库</string>
                       </property>
                       <property name="icon">
                        <iconset resource="res.qrc">

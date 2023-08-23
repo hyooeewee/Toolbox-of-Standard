@@ -188,6 +188,7 @@ font: 18pt &quot;Aa而墨行书&quot;;</string>
 	background-color: rgb(255, 255, 255);
 	border-top-right-radius:20px;
 	border-bottom-right-radius:20px;
+	padding-left:20px;
 }</string>
       </property>
       <property name="frameShape">
@@ -486,7 +487,7 @@ QPushButton:pressed{
                       </property>
                       <layout class="QHBoxLayout" name="horizontalLayout_6">
                        <property name="spacing">
-                        <number>50</number>
+                        <number>40</number>
                        </property>
                        <property name="leftMargin">
                         <number>0</number>
@@ -524,6 +525,10 @@ QPushButton:pressed{
                          </property>
                          <property name="text">
                           <string>找回密码</string>
+                         </property>
+                         <property name="icon">
+                          <iconset resource="res.qrc">
+                           <normaloff>:/icons/icons/3916693.png</normaloff>:/icons/icons/3916693.png</iconset>
                          </property>
                         </widget>
                        </item>
@@ -667,7 +672,7 @@ QPushButton:hover{
                 <item>
                  <widget class="QPushButton" name="pushButton_Login">
                   <property name="text">
-                   <string>登录</string>
+                   <string> 登录</string>
                   </property>
                   <property name="icon">
                    <iconset resource="res.qrc">
@@ -678,7 +683,7 @@ QPushButton:hover{
                 <item>
                  <widget class="QPushButton" name="pushButton_Register">
                   <property name="text">
-                   <string>注册</string>
+                   <string> 注册</string>
                   </property>
                   <property name="icon">
                    <iconset resource="res.qrc">
