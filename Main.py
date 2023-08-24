@@ -58,7 +58,7 @@ from PyQt5.QtWidgets import (QApplication, QFileDialog, QMainWindow,
 from standards_spider import *
 from UI.res_rc import *
 # from UI.LoginUi import Ui_LoginWindow
-INI_PATH = os.path.join(os.getcwd(), "config.ini")
+INI_PATH = r"config.ini"
 # INI_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.ini")
 DATABASE_PATH = r'.\Database\users.db'
 LOGIN_SETTINGS = []
@@ -329,9 +329,9 @@ class MainWindow(QMainWindow):
          
         
     def export(self):
-        data = DB_data_get.SiChuan()
-        data += DB_data_get.BeiJing()
-        # data += DB_data_get.TianJin()
+        # data = DB_data_get.SiChuan()
+        # data += DB_data_get.BeiJing()
+        data = DB_data_get.TianJin()
         # data = csres_get(self.ui.lineEdit_Search.text())
         if data:
             conn = sqlite3.connect(DATABASE_PATH)
@@ -396,7 +396,20 @@ def save_setting():
 def load_json():
     pass
 
+# 资源文件目录访问
+def source_path(relative_path):
+    # 是否Bundle Resource
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 if __name__ == "__main__":
+    # 修改当前工作目录，使得资源文件可以被正确访问
+    cd = source_path('')
+    os.chdir(cd)
+
     load_setting()
     load_json()
     app = QApplication(sys.argv)
