@@ -11,12 +11,14 @@ import re
 import urllib
 
 import chardet
+import lxml
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from requests.exceptions import RequestException
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 
 
 def csres_get(keyword):
@@ -41,8 +43,7 @@ def csres_get(keyword):
         return 0
 
 class DB_data_get():
-    def BeiJing():
-        '''获取北京市标准'''
+    def Beijing():
         total_list = []
         total_html = ""
         chrome_options = Options()
@@ -73,8 +74,174 @@ class DB_data_get():
         # print(total_page)
         return total_list
 
-    def SiChuan():
-        '''获取四川省标准'''
+    def Tianjin():
+        html = []
+        total_list = []
+        result_list = []
+        url = "https://zfcxjs.tj.gov.cn/ztzl_70/bzgf/xxbz/xxbzgf/"
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) App leWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D257 Safari/9537.53'
+        }
+        response = requests.get(url, headers=headers, verify=False)
+        html = response.content
+        # print(response.status_code)
+        if response.status_code == 200:
+            html =  response.text.encode('raw_unicode_escape').decode().replace(" ", "").replace("\n", "").replace("	", "")
+            print(html)
+            # print(type(html))
+            pattern = r'varitem_.*?SYBT:"(.*?)",BT:"(.*?)",FBT:".*?DOCPUBURL:"(.*?)",'
+            matches = re.findall(pattern, html, re.S)
+            # print(matches)
+            for i in range(len(matches)):
+                bianhao = matches[i][0]
+                biaoti = matches[i][1]
+                dizhi = matches[i][2]
+                total_list.append([bianhao,biaoti,'','','',dizhi])
+        else:
+            return total_list
+
+    def Hebei():
+        chrome_options = Options() # 实例化option对象
+        chrome_options.add_argument("--headless") # 把Chrome浏览器设置为静默模式
+        chrome_options.add_argument('--disable-gpu') # 禁止加载图片
+        chrome_options.add_argument('log-level=3')
+        driver = webdriver.Chrome(options=chrome_options) 
+        browser = webdriver.Chrome(options=chrome_options)
+        base_url = 'http://zfcxjst.hebei.gov.cn/hbzjt/ztzl/jj/gcjsgf/'
+        standard_list = []
+        for item in ['fwjz/', 'szgc/', 'czjs/', 'sxjs/', 'zjbz/']:
+            item_url = base_url + item
+            driver.get(item_url)    
+            try:
+                max_page = re.findall('index_(.*?).html', driver.find_element(By.CSS_SELECTOR, '#page_nav_list > a.pb_end_page').get_attribute('href'))[0]
+            except:
+                max_page = 1
+            for i in range(1, int(max_page)+1):
+                url = item_url + f"index_{i}.html"
+                driver.get(url)
+                elements = driver.find_elements(By.CSS_SELECTOR, '#number > li')
+                for element in elements: 
+                    # 标准编号，标准标题，实施日期，作废日期，标准状态，下载链接
+                    standard = []
+                    standard.append(element.find_element(By.CSS_SELECTOR, '#number > li > div.bianhao.pso > span').text)
+                    standard.append(element.find_element(By.CSS_SELECTOR, '#number > li > div.mingcheng > a').text)
+                    try:
+                        standard.append(element.find_element(By.CSS_SELECTOR, '#number > li > div.riqi.pso > span').text)
+                        standard.append('')
+                        standard.append('现行')
+                        href = element.find_element(By.CSS_SELECTOR, '#number > li > div.yulan.pso > span > a').get_attribute('href')
+                        
+                        browser.get(href)
+                        standard.append(browser.find_element(By.CSS_SELECTOR, '#yanse > div.p_nei > div > span > div > iframe').get_attribute('src'))
+                    except:
+                        standard.append('')
+                        standard.append('')
+                        standard.append('')
+                        standard.append('')
+                    standard_list.append(standard)
+                print(f'获取河北省地方标准第{i}/{max_page}页')
+        driver.quit()
+        browser.quit()
+        return standard_list
+
+    def Sanxi():
+        pass
+
+    def Neimenggu():
+        pass
+
+    def Liaoning():
+        pass
+
+    def Jilin():
+        pass
+
+    def Heilongjiang():
+        pass
+
+    def Shanghai():
+        pass
+
+    def Jiangsu():
+        pass
+    
+    def ZheJiang():
+        '''
+        已知问题：
+        1.实施时间可能不太对，之后再调整
+        '''
+        chrome_options = Options() # 实例化option对象
+        chrome_options.add_argument("--headless") # 把Chrome浏览器设置为静默模式
+        chrome_options.add_argument('--disable-gpu') # 禁止加载图片
+        chrome_options.add_argument('log-level=3')
+        url = "https://bz.zjamr.zj.gov.cn/public/std/list/DB/1.html"
+        driver = webdriver.Chrome(options=chrome_options) 
+        driver.get(url)    
+        driver.implicitly_wait(5)
+        # pattern = r'查询到相关标准(.*?)条'
+        # total_page = int(re.findall(pattern, driver.page_source, re.S)[0])
+        # print(total_page)
+        max_page = driver.find_element(By.CSS_SELECTOR, '#layui-laypage-1 > a.layui-laypage-last').text
+        # print(max_page)
+        standard_list = []
+        for i in range(1, int(max_page)+1):
+            url = "https://bz.zjamr.zj.gov.cn/public/std/list/DB/{}.html".format(i)
+            driver.get(url)
+            elements = driver.find_elements(By.CSS_SELECTOR, '#dbDiv > div > div > div > ul')
+            for element in elements[:-1]: 
+                # 标准编号，标准标题，实施日期，作废日期，标准状态，下载链接
+                standard = []
+                standard.append(element.find_element(By.CSS_SELECTOR, 'span.list-gb').text)
+                standard.append(element.find_element(By.CSS_SELECTOR, 'li.std_title').text.split('：')[-1])
+                try:
+                    standard.append(element.find_element(By.CSS_SELECTOR, 'span.bztm').text.split('：')[-1])
+                    standard.append('')
+                    standard.append(element.find_element(By.CSS_SELECTOR, 'span.liat-time').text)
+                    standard.append(re.search('https:.*?.pdf', element.find_element(By.CSS_SELECTOR, 'a.list-yl').get_attribute('onclick')).group().replace('\/', '/'))
+                except:
+                    standard.append('')
+                    standard.append('')
+                    standard.append('')
+                    standard.append('')
+                standard_list.append(standard)
+            print(f'获取浙江省地方标准第{i}/{max_page}')
+        driver.quit()
+        return standard_list
+
+    def Anhui():
+        pass
+
+    def Fujian():
+        pass
+
+    def Jiangxi():
+        pass
+
+    def Shandong():
+        pass
+
+    def Henan():
+        pass
+
+    def Hubei():
+        pass
+
+    def Hunan():
+        pass
+
+    def Guangdong():
+        pass
+
+    def Guangxi():
+        pass
+
+    def Hainan():
+        pass
+
+    def Chongqing():
+        pass
+
+    def Sichuan():
         # from requests.exceptions import RequestException
         # import urllib
         SiChuan_URL = "http://jst.sc.gov.cn/scjst/bzgf/zhuanlan.shtml"
@@ -132,31 +299,40 @@ class DB_data_get():
         except RequestException:
             return result_list
 
-    def TianJin():
-        html = []
-        total_list = []
-        result_list = []
-        url = "https://zfcxjs.tj.gov.cn/ztzl_70/bzgf/xxbz/xxbzgf/"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.188'
-        }
-        response = requests.get(url, headers=headers, verify=False)
-        html = response.content
-        print(response.status_code)
-        if response.status_code == 200:
-            html =  response.text.encode('raw_unicode_escape').decode().replace(" ", "").replace("\n", "").replace("	", "")
-            print(html)
-            print(type(html))
-            pattern = r'varitem_.*?SYBT:"(.*?)",BT:"(.*?)",FBT:".*?DOCPUBURL:"(.*?)",'
-            matches = re.findall(pattern, html, re.S)
-            print(matches)
-            for i in range(len(matches)):
-                bianhao = matches[i][0]
-                biaoti = matches[i][1]
-                dizhi = matches[i][2]
-                total_list.append([bianhao,biaoti,'','','',dizhi])
-        else:
-            return total_list
+    def Guizhou():
+        pass
+
+    def Yunnan():
+        pass
+    
+    def Xizang():
+        pass
+
+    def Shanxi():
+        pass
+
+    def Gansu():
+        pass
+
+    def Qinghai():
+        pass
+
+    def Ningxia():
+        pass
+
+    def Xinjiang():
+        pass
+
+    def Taiwan():
+        pass
+
+    def Hongkong():
+        pass
+
+    def Macau():
+        pass
+        
+    
 
 def read_cell_data(sheet, i, j):
     try:
@@ -216,5 +392,5 @@ if __name__ == "__main__":
     #     # with open('./standards/standerds.html', 'w+', encoding='utf-8') as fp:
     #     #     fp.write(data)
     #     break
-    print(DB_data_get.TianJin())
+    print(DB_data_get.Hebei())
 

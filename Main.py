@@ -57,6 +57,7 @@ from PyQt5.QtWidgets import (QApplication, QFileDialog, QMainWindow,
 
 from standards_spider import *
 from UI.res_rc import *
+
 # from UI.LoginUi import Ui_LoginWindow
 INI_PATH = r"config.ini"
 # INI_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.ini")
@@ -86,7 +87,7 @@ class LoginWindow(QMainWindow):
         self.setWindowFlag(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         # 不懂为啥这里是myappid，后面来研究
-        self.setWindowIcon(QIcon(r'.\UI\icons\3914110.ico'))
+        self.setWindowIcon(QIcon(r'Logo.ico'))
         # 不懂为啥这里是myappid，后面来研究
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("myappid")
 
@@ -329,9 +330,40 @@ class MainWindow(QMainWindow):
          
         
     def export(self):
-        # data = DB_data_get.SiChuan()
-        # data += DB_data_get.BeiJing()
-        data = DB_data_get.TianJin()
+        # data = DB_data_get.Beijing()
+        # data = DB_data_get.Tianjin()
+        data = DB_data_get.Hebei()
+        # data = DB_data_get.Sanxi()
+        # data = DB_data_get.Neimenggu()
+        # data = DB_data_get.Liaoning()
+        # data = DB_data_get.Jilin()
+        # data = DB_data_get.Heilongjiang()
+        # data = DB_data_get.Shanghai()
+        # data = DB_data_get.Jiangsu()
+        # data = DB_data_get.ZheJiang()
+        # data = DB_data_get.Anhui()
+        # data = DB_data_get.Fujian()
+        # data = DB_data_get.Jiangxi()
+        # data = DB_data_get.Shandong()
+        # data = DB_data_get.Henan()
+        # data = DB_data_get.Hubei()
+        # data = DB_data_get.Hunan()
+        # data = DB_data_get.Guangdong()
+        # data = DB_data_get.Guangxi()
+        # data = DB_data_get.Hainan()
+        # data = DB_data_get.Chongqing()
+        # data = DB_data_get.Sichuan()
+        # data = DB_data_get.Guizhou()
+        # data = DB_data_get.Yunnan()
+        # data = DB_data_get.Xizang()
+        # data = DB_data_get.Shanxi()
+        # data = DB_data_get.Gansu()
+        # data = DB_data_get.Qinghai()
+        # data = DB_data_get.Ningxia()
+        # data = DB_data_get.Xinjiang()
+        # data = DB_data_get.Taiwan()
+        # data = DB_data_get.Hongkong()
+        # data = DB_data_get.Macau()
         # data = csres_get(self.ui.lineEdit_Search.text())
         if data:
             conn = sqlite3.connect(DATABASE_PATH)
