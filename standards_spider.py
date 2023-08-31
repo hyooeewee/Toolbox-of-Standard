@@ -8,6 +8,7 @@ import codecs
 import json
 import random
 import re
+import time
 import urllib
 
 import chardet
@@ -87,7 +88,7 @@ class DB_data_get():
         # print(response.status_code)
         if response.status_code == 200:
             html =  response.text.encode('raw_unicode_escape').decode().replace(" ", "").replace("\n", "").replace("	", "")
-            print(html)
+            # print(html)
             # print(type(html))
             pattern = r'varitem_.*?SYBT:"(.*?)",BT:"(.*?)",FBT:".*?DOCPUBURL:"(.*?)",'
             matches = re.findall(pattern, html, re.S)
@@ -97,8 +98,9 @@ class DB_data_get():
                 biaoti = matches[i][1]
                 dizhi = matches[i][2]
                 total_list.append([bianhao,biaoti,'','','',dizhi])
-        else:
+            # print(total_list)
             return total_list
+
 
     def Hebei():
         chrome_options = Options() # 实例化option对象
@@ -160,7 +162,35 @@ class DB_data_get():
         pass
 
     def Shanghai():
-        pass
+        headers = {
+            "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.203"
+        }
+        standard_list = []
+        def change_data(data: list):
+            data = list(data)
+            data.insert(3, '')
+            if item in ['xxbz', 'xxsj']:
+                data.insert(4, '现行')
+            else:
+                data.insert(4, '废止')
+            if data[5]:
+                data[5] = 'https://zjw.sh.gov.cn/'+data[5]
+            return data
+        for item in ['xxbz', 'xxbzsj', 'fzbz', 'fzbzsj']:
+            url = f'https://zjw.sh.gov.cn/{item}/index.html'
+            response = requests.get(url, headers=headers).text
+            # print(response)
+            # with open('file.txt', 'w', encoding='utf-8') as f:
+            #     f.write(response)
+            total_page = re.findall(' totalPage: ([0-9]*?),', response)[0]
+            # print(total_page)
+            for i in range(1, int(total_page)+1):
+                if i != 1:
+                    url = f'https://zjw.sh.gov.cn/{item}/index_{i}.html'
+                response = requests.get(url, headers=headers).text
+                data_list = re.findall('<td width="15%">(.*?)</td>.*?<td width="32%">(.*?)</td>.*?<td width="10%">(.*?)</td>.*?<td width="8%"><a href="(.*?)" title="">', response, re.S)
+                standard_list += list(map(change_data, data_list))
+        return standard_list
 
     def Jiangsu():
         pass
@@ -230,7 +260,46 @@ class DB_data_get():
         pass
 
     def Guangdong():
-        pass
+        chrome_options = Options() # 实例化option对象
+        chrome_options.add_argument("--headless") # 把Chrome浏览器设置为静默模式
+        chrome_options.add_argument('--disable-gpu') # 禁止加载图片
+        chrome_options.add_argument('log-level=3')
+        driver = webdriver.Chrome(options=chrome_options) 
+        driver.implicitly_wait(10)
+        url = 'https://bzgl.gdcic.net/#/home/tabsBZ'
+        driver.get(url)
+        driver.find_element(By.XPATH, '//*[@id="app"]/div/div[3]/div/div[5]/div/div/div/ul/li[11]/div/div').click()
+        driver.find_element(By.XPATH, '/html/body/div[1]/div/div[3]/div/div[5]/div/div/div/ul/li[11]/div[2]/div/div/div/ul/li[4]').click()
+        time.sleep(1)
+        max_num = driver.find_element(By.XPATH, '//*[@id="app"]/div/div[3]/div/div[5]/div/div/div/ul/li[1]').text.split(' ')[1]
+        standard_list = []
+        for x in range(int(max_num)//100+1):
+            elements = driver.find_elements(By.XPATH, '//*[@id="app"]/div/div[3]/div/div[5]/div/div/div/div/div/div/table/tbody/tr')
+            # print(len(elements))
+            i = x*100 + 0
+            for element in elements: 
+                # 标准编号，标准标题，实施日期，作废日期，标准状态，下载链接
+                standard = []
+                element_child = element.find_elements(By.CLASS_NAME, 'ant-table-row-cell-break-word')
+                standard.append(element_child[1].text)
+                standard.append(element_child[2].text)
+                try:
+                    standard.append(element_child[6].text)
+                    standard.append('')
+                    standard.append(element_child[4].text)
+                    standard.append('')
+                except:
+                    standard.append('')
+                    standard.append('')
+                    standard.append('')
+                    standard.append('')
+                standard_list.append(standard)
+                i += 1
+                # print(f'获取广东省地方标准第{i}/{max_num}条')
+            driver.find_element(By.XPATH, '//*[@id="app"]/div/div[3]/div/div[5]/div/div/div/ul/li[5]').click()
+            time.sleep(1)
+        print(standard_list)
+        return standard_list
 
     def Guangxi():
         pass
@@ -392,5 +461,5 @@ if __name__ == "__main__":
     #     # with open('./standards/standerds.html', 'w+', encoding='utf-8') as fp:
     #     #     fp.write(data)
     #     break
-    print(DB_data_get.Hebei())
+    print(DB_data_get.Tianjin())
 

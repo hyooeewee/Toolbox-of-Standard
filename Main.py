@@ -55,6 +55,7 @@ from PyQt5.QtGui import QCursor, QIcon, QMoveEvent
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QMainWindow,
                              QMessageBox, QPushButton, QTableWidgetItem)
 
+from PyQt5.QtNetwork import QLocalSocket, QLocalServer
 from standards_spider import *
 from UI.res_rc import *
 
@@ -62,21 +63,43 @@ from UI.res_rc import *
 INI_PATH = r"config.ini"
 # INI_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.ini")
 DATABASE_PATH = r'.\Database\users.db'
-LOGIN_SETTINGS = []
 UID = ''
 USER = ''
+PASSWORD = ''
+AUTO_LOGIN = 0
+REMEMBER_PASSWORD = 0
 PROVINCE_CODE = []
+class MyConfigParser(ConfigParser):
+    '''重写类，取消大小写不敏感'''
+    def optionxform(self, optionstr):
+        return optionstr
 
 def load_setting():
-    global LOGIN_SETTINGS, PROVINCE_CODE
-    cf = ConfigParser()
+    global UID, USER, PASSWORD, AUTO_LOGIN, REMEMBER_PASSWORD, PROVINCE_CODE
+    cf = MyConfigParser()
     cf.read(INI_PATH, encoding='utf-8')
     LOGIN_SETTINGS = cf.items('LOGIN_SETTINGS')
     UID = LOGIN_SETTINGS[0][1]
     USER = LOGIN_SETTINGS[1][1]
+    PASSWORD = LOGIN_SETTINGS[2][1]
+    AUTO_LOGIN = int(LOGIN_SETTINGS[3][1])
+    REMEMBER_PASSWORD = int(LOGIN_SETTINGS[4][1])
     PROVINCE_CODE = cf.items('PROVINCE_CODE')
 
+def dump_setting():
+    global UID, USER, PASSWORD, AUTO_LOGIN, REMEMBER_PASSWORD
+    cf = MyConfigParser(comment_prefixes='；', allow_no_value=True)
+    cf.read(INI_PATH, encoding='utf-8')
+    cf['LOGIN_SETTINGS']['UID'] = str(UID)
+    cf['LOGIN_SETTINGS']['USER'] = str(USER)
+    cf['LOGIN_SETTINGS']['PASSWORD'] = str(PASSWORD)
+    cf['LOGIN_SETTINGS']['AUTO_LOGIN'] = str(AUTO_LOGIN)
+    cf['LOGIN_SETTINGS']['REMEMBER_PASSWORD'] = str(REMEMBER_PASSWORD)
+    with open(INI_PATH, 'w', encoding='utf-8') as f:
+        cf.write(f)
+
 class LoginWindow(QMainWindow):
+    global AUTO_LOGIN, REMEMBER_PASSWORD
     def __init__(self):
         super().__init__()
         # self.ui = Ui_LoginWindow()
@@ -104,17 +127,19 @@ class LoginWindow(QMainWindow):
         self.ui.pushButton_Register.clicked.connect(lambda: self.ui.stackedWidget_2.setCurrentIndex(1))
 
         self.ui.pushButton_LSure.clicked.connect(self.login)
-        self.ui.checkBox_AutoLogin.isChecked()
-        self.ui.checkBox_RememberPassword.isChecked()
-        self.ui.checkBox_AutoLogin.stateChanged.connect(lambda: QMessageBox.warning(self, "提示", "功能研发中..."))
-        self.ui.checkBox_RememberPassword.stateChanged.connect(lambda: QMessageBox.warning(self, "提示", "功能研发中..."))
+        self.ui.checkBox_RememberPassword.setChecked(REMEMBER_PASSWORD)
+        if self.ui.checkBox_RememberPassword.isChecked():
+            self.ui.lineEdit_LPassword.setText(PASSWORD)
+            self.ui.checkBox_AutoLogin.setChecked(AUTO_LOGIN)  
+        self.ui.checkBox_AutoLogin.stateChanged.connect(self.auto_login)
+        self.ui.checkBox_RememberPassword.stateChanged.connect(self.remember_number)
         self.ui.pushButton_Forgetpassword.clicked.connect(lambda: QMessageBox.warning(self, "提示", "功能研发中..."))
         if USER:
             self.ui.lineEdit_LAccount.setText(USER)
-        
         self.ui.pushButton_RSure.clicked.connect(self.register)
-
         self.show()
+        if self.ui.checkBox_AutoLogin.isChecked():  
+            self.login()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -132,8 +157,26 @@ class LoginWindow(QMainWindow):
         self.m_flag = False
         self.setCursor(QCursor(Qt.ArrowCursor))
 
+    def auto_login(self):
+        global AUTO_LOGIN, REMEMBER_PASSWORD
+        if self.ui.checkBox_AutoLogin.isChecked():
+            REMEMBER_PASSWORD = 1
+            AUTO_LOGIN = 1
+            self.ui.checkBox_RememberPassword.setChecked(REMEMBER_PASSWORD)
+        else:
+            AUTO_LOGIN = 0
+    
+    def remember_number(self):
+        global AUTO_LOGIN, REMEMBER_PASSWORD
+        if self.ui.checkBox_RememberPassword.isChecked():
+            REMEMBER_PASSWORD = 1
+        else:
+            AUTO_LOGIN = 0
+            REMEMBER_PASSWORD = 0
+            self.ui.checkBox_AutoLogin.setChecked(AUTO_LOGIN)
+
     def login(self):
-        global USER, UID
+        global UID, USER, PASSWORD
         account = self.ui.lineEdit_LAccount.text()
         password = self.ui.lineEdit_LPassword.text()
         if account and password:
@@ -143,25 +186,24 @@ class LoginWindow(QMainWindow):
             rows = cur.fetchall()
             conn.commit()
             conn.close()
-            print(rows)
+            # print(rows)
             if rows:
                 for row in rows:
                     if row[1] == password:
                         UID = row[0]
+                        USER = account
+                        PASSWORD = password
+                        dump_setting()
                         self.ui.stackedWidget.setCurrentIndex(0)
                         self.ui.label_Tips.setText('登录成功！')
-                        time.sleep(1)
-                        break
+                        self.close()
+                        MainWindow()
             else:
                 self.ui.stackedWidget.setCurrentIndex(1)
                 self.ui.label_Wrong.setText('账号或者密码错误！')
         else:
             self.ui.stackedWidget.setCurrentIndex(1)
             self.ui.label_Wrong.setText('账号或密码不能为空！')
-        if UID:
-            USER = account
-            self.win = MainWindow()
-            self.close()
 
     def forget_password(self):
         self.ui.stackedWidget.setCurrentIndex(1)
@@ -332,7 +374,7 @@ class MainWindow(QMainWindow):
     def export(self):
         # data = DB_data_get.Beijing()
         # data = DB_data_get.Tianjin()
-        data = DB_data_get.Hebei()
+        # data = DB_data_get.Hebei()
         # data = DB_data_get.Sanxi()
         # data = DB_data_get.Neimenggu()
         # data = DB_data_get.Liaoning()
@@ -438,7 +480,7 @@ def source_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 if __name__ == "__main__":
-    # 修改当前工作目录，使得资源文件可以被正确访问
+    # 修改当前工作目录，使得资源文件可以被正确访问，打包需要
     cd = source_path('')
     os.chdir(cd)
 
