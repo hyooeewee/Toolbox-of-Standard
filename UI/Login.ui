@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>850</width>
-    <height>540</height>
+    <width>720</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -55,122 +55,38 @@
      <number>10</number>
     </property>
     <item>
-     <widget class="QFrame" name="frame">
+     <widget class="QLabel" name="label">
       <property name="minimumSize">
        <size>
-        <width>360</width>
-        <height>480</height>
+        <width>370</width>
+        <height>460</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>380</width>
-        <height>500</height>
+        <width>350</width>
+        <height>460</height>
        </size>
       </property>
-      <property name="styleSheet">
-       <string notr="true">#frame{
-background-color: qlineargradient(spread:pad, x1:0.517045, y1:1, x2:0.5, y2:0, stop:0 rgba(255, 0, 0, 255), stop:0.522727 rgba(255, 0, 127, 255), stop:1 rgba(0, 170, 255, 255));
-border-radius:20px;
-}</string>
+      <property name="font">
+       <font>
+        <family>微软雅黑</family>
+        <pointsize>46</pointsize>
+       </font>
       </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/icons/icons/3914110.png&quot;/&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:48pt; font-weight:600;&quot;&gt;规范通&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;版本 V1.0&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_7">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <property name="leftMargin">
-        <number>12</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item>
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>160</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>1</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">color: rgb(255, 255, 255);
-font: 25pt &quot;Aa而墨行书&quot;;</string>
-         </property>
-         <property name="text">
-          <string>Welcome</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>1</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="font">
-          <font>
-           <family>Aa而墨行书</family>
-           <pointsize>18</pointsize>
-           <weight>50</weight>
-           <italic>false</italic>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">color: rgb(255, 255, 255);
-font: 18pt &quot;Aa而墨行书&quot;;</string>
-         </property>
-         <property name="text">
-          <string>欢迎使用标准工具箱
-你的支持是我不断前进的动力</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>160</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
      </widget>
     </item>
     <item>
      <widget class="QFrame" name="frame_2">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
         <width>350</width>
@@ -780,8 +696,6 @@ QPushButton:hover{
      </widget>
     </item>
    </layout>
-   <zorder>frame_2</zorder>
-   <zorder>frame</zorder>
   </widget>
   <action name="actionhuanying">
    <property name="text">

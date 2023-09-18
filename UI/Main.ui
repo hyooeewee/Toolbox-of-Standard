@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>927</width>
-    <height>672</height>
+    <width>850</width>
+    <height>700</height>
    </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>850</width>
+    <height>700</height>
+   </size>
   </property>
   <property name="font">
    <font>
@@ -240,6 +246,12 @@ QFrame{
                  <height>0</height>
                 </size>
                </property>
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
                <property name="text">
                 <string>首页</string>
                </property>
@@ -264,7 +276,8 @@ QFrame{
                </property>
                <property name="font">
                 <font>
-                 <family>幼圆</family>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -283,6 +296,12 @@ QFrame{
              </item>
              <item>
               <widget class="QPushButton" name="pushButton_CheckList">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
                <property name="text">
                 <string>批量查询</string>
                </property>
@@ -295,12 +314,44 @@ QFrame{
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="pushButton_Generate">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>目录生成</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_News">
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>标准新闻</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="pushButton_My">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
                  <height>0</height>
                 </size>
+               </property>
+               <property name="font">
+                <font>
+                 <family>微软雅黑</family>
+                 <pointsize>14</pointsize>
+                </font>
                </property>
                <property name="text">
                 <string>我的</string>
@@ -380,18 +431,145 @@ QFrame{
                  <property name="bottomMargin">
                   <number>0</number>
                  </property>
-                 <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
-                  <widget class="QLabel" name="label">
-                   <property name="styleSheet">
-                    <string notr="true">color: rgb(0, 0, 0);
-font: 20pt &quot;Aa而墨行书&quot;;
-border: 1px solid blue;
-border-radius: 5px;</string>
-                   </property>
-                   <property name="text">
-                    <string>欢迎登录我的界面</string>
-                   </property>
-                  </widget>
+                 <item>
+                  <layout class="QGridLayout" name="gridLayout">
+                   <item row="4" column="0">
+                    <widget class="QLabel" name="label_4">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;网络数据库版本：&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="0">
+                    <spacer name="verticalSpacer_3">
+                     <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>20</width>
+                       <height>40</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item row="0" column="0">
+                    <spacer name="verticalSpacer_2">
+                     <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>20</width>
+                       <height>40</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item row="6" column="0">
+                    <spacer name="verticalSpacer">
+                     <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>20</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item row="1" column="0" colspan="2">
+                    <widget class="QLabel" name="label">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;欢迎使用本系统，您的意见是我们前进的动力&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="4" column="1">
+                    <widget class="QLabel" name="label_OnlineDB_V">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>暂未上线</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="0">
+                    <widget class="QLabel" name="label_2">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;本地数据库版本：&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="1">
+                    <widget class="QLabel" name="label_LocalDB_V">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>TextLabel</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="5" column="0">
+                    <widget class="QLabel" name="label_6">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;当前登录用户&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="5" column="1">
+                    <widget class="QLabel" name="label_UserName">
+                     <property name="font">
+                      <font>
+                       <family>微软雅黑</family>
+                       <pointsize>14</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>TextLabel</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="7" column="0" colspan="2">
+                    <widget class="QPushButton" name="pushButton_Export">
+                     <property name="text">
+                      <string>更新数据库</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
                  </item>
                 </layout>
                </widget>
@@ -596,6 +774,36 @@ border-radius: 5px;</string>
                     </item>
                     <item>
                      <widget class="QTableWidget" name="tableWidget">
+                      <property name="enabled">
+                       <bool>true</bool>
+                      </property>
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>730</width>
+                        <height>572</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>730</width>
+                        <height>572</height>
+                       </size>
+                      </property>
+                      <property name="sizeIncrement">
+                       <size>
+                        <width>0</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="horizontalScrollBarPolicy">
+                       <enum>Qt::ScrollBarAlwaysOn</enum>
+                      </property>
                       <property name="editTriggers">
                        <set>QAbstractItemView::NoEditTriggers</set>
                       </property>
@@ -605,7 +813,16 @@ border-radius: 5px;</string>
                       <property name="sortingEnabled">
                        <bool>true</bool>
                       </property>
+                      <attribute name="horizontalHeaderVisible">
+                       <bool>true</bool>
+                      </attribute>
                       <attribute name="horizontalHeaderCascadingSectionResizes">
+                       <bool>true</bool>
+                      </attribute>
+                      <attribute name="horizontalHeaderDefaultSectionSize">
+                       <number>80</number>
+                      </attribute>
+                      <attribute name="horizontalHeaderHighlightSections">
                        <bool>true</bool>
                       </attribute>
                       <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
@@ -619,6 +836,9 @@ border-radius: 5px;</string>
                       </attribute>
                       <attribute name="verticalHeaderCascadingSectionResizes">
                        <bool>true</bool>
+                      </attribute>
+                      <attribute name="verticalHeaderDefaultSectionSize">
+                       <number>40</number>
                       </attribute>
                       <attribute name="verticalHeaderHighlightSections">
                        <bool>true</bool>
@@ -661,8 +881,8 @@ border-radius: 5px;</string>
                       </column>
                      </widget>
                     </item>
-                    <item alignment="Qt::AlignRight">
-                     <widget class="QPushButton" name="pushButton_Export">
+                    <item>
+                     <widget class="QPushButton" name="pushButton_DownLoad">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                         <horstretch>0</horstretch>
@@ -680,7 +900,7 @@ border-radius: 5px;</string>
 border: none;</string>
                       </property>
                       <property name="text">
-                       <string>更新数据库</string>
+                       <string>下载</string>
                       </property>
                       <property name="icon">
                        <iconset resource="res.qrc">
@@ -960,6 +1180,9 @@ QPushButton:pressed{
                       <property name="styleSheet">
                        <string notr="true">font: 12pt &quot;幼圆&quot;;</string>
                       </property>
+                      <property name="currentIndex">
+                       <number>0</number>
+                      </property>
                       <widget class="QWidget" name="page">
                        <layout class="QHBoxLayout" name="horizontalLayout_7">
                         <property name="spacing">
@@ -1042,11 +1265,9 @@ QPushButton:pressed{
   <tabstop>lineEdit_Search</tabstop>
   <tabstop>comboBox_2</tabstop>
   <tabstop>pushButton_My</tabstop>
-  <tabstop>pushButton_Home</tabstop>
   <tabstop>pushButton_Check</tabstop>
   <tabstop>pushButton_CheckList</tabstop>
   <tabstop>pushButton_Search</tabstop>
-  <tabstop>pushButton_Export</tabstop>
   <tabstop>lineEdit_CLOpen1</tabstop>
   <tabstop>pushButton_CLOpen1</tabstop>
   <tabstop>lineEdit_CLOpen2</tabstop>
