@@ -259,7 +259,7 @@ QFrame{
                 <bool>true</bool>
                </property>
                <property name="checked">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
                <property name="autoExclusive">
                 <bool>true</bool>
@@ -308,6 +308,9 @@ QFrame{
                <property name="checkable">
                 <bool>true</bool>
                </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
                <property name="autoExclusive">
                 <bool>true</bool>
                </property>
@@ -324,6 +327,15 @@ QFrame{
                <property name="text">
                 <string>目录生成</string>
                </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+               <property name="autoExclusive">
+                <bool>true</bool>
+               </property>
               </widget>
              </item>
              <item>
@@ -336,6 +348,12 @@ QFrame{
                </property>
                <property name="text">
                 <string>标准新闻</string>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="autoExclusive">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -412,7 +430,7 @@ QFrame{
                 <string notr="true"/>
                </property>
                <property name="currentIndex">
-                <number>1</number>
+                <number>0</number>
                </property>
                <widget class="QWidget" name="page_Home">
                 <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -814,7 +832,7 @@ QFrame{
                        <bool>true</bool>
                       </property>
                       <attribute name="horizontalHeaderVisible">
-                       <bool>true</bool>
+                       <bool>false</bool>
                       </attribute>
                       <attribute name="horizontalHeaderCascadingSectionResizes">
                        <bool>true</bool>
@@ -832,7 +850,7 @@ QFrame{
                        <bool>true</bool>
                       </attribute>
                       <attribute name="verticalHeaderVisible">
-                       <bool>true</bool>
+                       <bool>false</bool>
                       </attribute>
                       <attribute name="verticalHeaderCascadingSectionResizes">
                        <bool>true</bool>
@@ -1039,6 +1057,48 @@ border: none;</string>
                   </widget>
                  </item>
                 </layout>
+               </widget>
+               <widget class="QWidget" name="page_Directory">
+                <widget class="QLabel" name="label_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>80</x>
+                   <y>320</y>
+                   <width>131</width>
+                   <height>41</height>
+                  </rect>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>微软雅黑</family>
+                   <pointsize>14</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>功能开发中</string>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QWidget" name="page_News">
+                <widget class="QLabel" name="label_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>330</y>
+                   <width>131</width>
+                   <height>41</height>
+                  </rect>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>微软雅黑</family>
+                   <pointsize>14</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>功能开发中</string>
+                 </property>
+                </widget>
                </widget>
                <widget class="QWidget" name="page_My">
                 <property name="styleSheet">

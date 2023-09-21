@@ -10,7 +10,7 @@ import random
 import re
 import time
 import urllib
-
+import datetime
 import chardet
 import lxml
 import pandas as pd
@@ -20,7 +20,8 @@ from requests.exceptions import RequestException
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-
+import locale
+locale.setlocale(locale.LC_ALL, 'zh_CN.UTF-8')
 
 def csres_get(keyword):
     '''工标网数据获取'''
@@ -44,7 +45,7 @@ def csres_get(keyword):
         return 0
 
 class DB_data_get():
-    def Beijing():
+    def Beijing():  #按照新格式更新完成，日期已格式化
         total_list = []
         total_html = ""
         chrome_options = Options()
@@ -69,10 +70,15 @@ class DB_data_get():
             biaoti = matches[i][2]
             DownloadLink = matches[i][1]
             StartDate = matches[i][3]
-            total_list.append([bianhao, biaoti, StartDate, '', '现行', DownloadLink])
+            if len(StartDate) > 8:  # 清洗日期数据，格式化显示，if避免空白内容
+                StartDate = str(datetime.datetime.strptime(StartDate, "%Y-%m-%d").strftime("%Y年%m月%d日"))
+            if len(bianhao) > 10:
+                bianhao = format_data.F_Beijing(bianhao)
+            total_list.append([bianhao, biaoti, StartDate, '', '现行', DownloadLink,"北京","",str(datetime.datetime.now())])
         return total_list
 
-    def Tianjin():
+    def Tianjin():  #按照新格式更新完成，日期已格式化
+        print("正在爬取天津地方标准...")
         html = []
         total_list = []
         result_list = []
@@ -100,11 +106,14 @@ class DB_data_get():
                     e_data = s_data
                     s_data = ''
                     status = '废止'
-                total_list.append([bianhao,biaoti,s_data,e_data,status,dizhi])
+                if len(s_data) > 8: #清洗日期数据，格式化显示，if避免空白内容
+                    s_data = str(datetime.datetime.strptime(s_data, "%Y年%m月%d日").strftime("%Y年%m月%d日"))
+                total_list.append([bianhao,biaoti,s_data,e_data,status,dizhi,"天津","",str(datetime.datetime.now())])
             return total_list
 
-
-    def Hebei():
+    def Hebei():    #按照新格式更新完成，日期已格式化
+        print("正在爬取河北省地方标准")
+        total_list = []
         chrome_options = Options() # 实例化option对象
         chrome_options.add_argument("--headless") # 把Chrome浏览器设置为静默模式
         chrome_options.add_argument('--disable-gpu') # 禁止加载图片
@@ -146,24 +155,15 @@ class DB_data_get():
                 print(f'获取河北省地方标准第{i}/{max_page}页')
         driver.quit()
         browser.quit()
-        return standard_list
+        for i in range(len(standard_list)):
+            if len(standard_list[i][2]) > 8:  # 清洗日期数据，格式化显示，if避免空白内容
+                standard_list[i][2] = str(datetime.datetime.strptime(standard_list[i][2], "%Y-%m-%d").strftime("%Y年%m月%d日"))
+            standard_list[i][0] = format_data.F_Hebei(standard_list[i][0])
+            total_list.append([standard_list[i][0],standard_list[i][1],standard_list[i][2],standard_list[i][3],standard_list[i][4],standard_list[i][5],"河北","",str(datetime.datetime.now())])
+        return total_list
 
-    def Sanxi():
-        pass
-
-    def Neimenggu():
-        pass
-
-    def Liaoning():
-        pass
-
-    def Jilin():
-        pass
-
-    def Heilongjiang():
-        pass
-
-    def Shanghai():
+    def Shanghai(): #按照新格式更新完成，日期已格式化
+        total_list = []
         headers = {
             "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.203"
         }
@@ -181,17 +181,110 @@ class DB_data_get():
         for item in ['xxbz', 'xxbzsj', 'fzbz', 'fzbzsj']:
             url = f'https://zjw.sh.gov.cn/{item}/index.html'
             response = requests.get(url, headers=headers).text
-            # print(response)
-            # with open('file.txt', 'w', encoding='utf-8') as f:
-            #     f.write(response)
             total_page = re.findall(' totalPage: ([0-9]*?),', response)[0]
-            # print(total_page)
             for i in range(1, int(total_page)+1):
                 if i != 1:
                     url = f'https://zjw.sh.gov.cn/{item}/index_{i}.html'
                 response = requests.get(url, headers=headers).text
                 data_list = re.findall('<td width="15%">(.*?)</td>.*?<td width="32%">(.*?)</td>.*?<td width="10%">(.*?)</td>.*?<td width="8%"><a href="(.*?)" title="">', response, re.S)
                 standard_list += list(map(change_data, data_list))
+        for i in range(len(standard_list)):
+            if len(standard_list[i][2]) > 6:  # 清洗日期数据，格式化显示，if避免空白内容
+                standard_list[i][2] = str(datetime.datetime.strptime(standard_list[i][2].replace(" ",""), "%Y-%m-%d").strftime("%Y年%m月%d日"))
+            standard_list[i][0] = format_data.F_Shanghai(standard_list[i][0])
+            total_list.append([standard_list[i][0],standard_list[i][1],standard_list[i][2],standard_list[i][3],standard_list[i][4],standard_list[i][5],"上海","",str(datetime.datetime.now())])
+        return total_list
+
+    def Sichuan():  #按照新格式更新完成，日期已格式化
+        total_list = []
+        SiChuan_URL = "http://jst.sc.gov.cn/scjst/bzgf/zhuanlan.shtml"
+        data_list = []
+        result_list = []
+        total_html = ""
+        try:
+            url = "http://jst.sc.gov.cn/scjst/bzgf/2023/3/13/ded7b643735240758041911d7f30f084.shtml"
+            response = requests.get(url)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.content, "html.parser")                # 定位表格元素
+                table = soup.find("table")                # 遍历表格行并提取数据
+                for row in table.find_all("tr"):
+                    row_data = [cell.get_text(strip=True) for cell in row.find_all(["th", "td"])]
+                    data_list.append(row_data)
+                data_list.pop(0)
+                for i in range(len(data_list)): #因为表格的原因，如果有缺少一列的情况，从此循环遍历补齐
+                    if len(data_list[i]) == 6:
+                        data_list[i] = [""] + data_list[i]
+                for i in range(len(data_list)): #状态空白的补充”现行“
+                    if len(data_list[i][6]) == 0:
+                        data_list[i][6] = '现行'
+                for i in range(len(data_list)):
+                    result_list.append([data_list[i][2],data_list[i][3],data_list[i][5],'',data_list[i][6],''])
+                # 以上为获取总目录及规范编号，以下为获取所有的下载链接
+            url = "http://jst.sc.gov.cn/scjst/bzgf/zhuanlan.shtml"
+            response = requests.get(url)
+            if response.status_code == 200:
+                total_html = total_html + response.text
+            for i in range(8):
+                url = "http://jst.sc.gov.cn/scjst/bzgf/zhuanlan" + "_" + str(i+2) + ".shtml"
+                response = requests.get(url)
+                if response.status_code == 200:
+                    total_html = total_html + response.text
+            pattern = r'title="【四川省.*?】(.*?)" href="(.*?)" target='
+            SiChuan_URL = re.findall(pattern, total_html, re.S)
+            for i in range(len(result_list)):
+                for j in range(len(SiChuan_URL)):
+                    if str(result_list[i][1]) in str(SiChuan_URL[j][0]):
+                        result_list[i][5] = str('http://jst.sc.gov.cn' + "/" + SiChuan_URL[j][1])[:-6] + "/files/" + urllib.parse.quote(result_list[i][1], safe='') + ".pdf"
+                        break
+            for i in range(len(result_list)):
+                result_list[i][0] = format_data.F_Sichuan(result_list[i][0])
+                if len(result_list[i][2]) > 4: #清洗日期数据，格式化显示，if避免空白内容
+                    result_list[i][2] = str(datetime.datetime.strptime(result_list[i][2], "%Y.%m.%d").strftime("%Y年%m月%d日"))
+                total_list.append([result_list[i][0],result_list[i][1],result_list[i][2],result_list[i][3],result_list[i][4],result_list[i][5],"四川","",str(datetime.datetime.now())])
+            return total_list
+        except RequestException:
+            return total_list
+
+    def Guangdong():
+        chrome_options = Options() # 实例化option对象
+        chrome_options.add_argument("--headless") # 把Chrome浏览器设置为静默模式
+        chrome_options.add_argument('--disable-gpu') # 禁止加载图片
+        chrome_options.add_argument('log-level=3')
+        driver = webdriver.Chrome(options=chrome_options)
+        driver.implicitly_wait(10)
+        url = 'https://bzgl.gdcic.net/#/home/tabsBZ'
+        driver.get(url)
+        driver.find_element(By.XPATH, '//*[@id="app"]/div/div[3]/div/div[5]/div/div/div/ul/li[11]/div/div').click()
+        driver.find_element(By.XPATH, '/html/body/div[1]/div/div[3]/div/div[5]/div/div/div/ul/li[11]/div[2]/div/div/div/ul/li[4]').click()
+        time.sleep(1)
+        max_num = driver.find_element(By.XPATH, '//*[@id="app"]/div/div[3]/div/div[5]/div/div/div/ul/li[1]').text.split(' ')[1]
+        standard_list = []
+        for x in range(int(max_num)//100+1):
+            elements = driver.find_elements(By.XPATH, '//*[@id="app"]/div/div[3]/div/div[5]/div/div/div/div/div/div/table/tbody/tr')
+            # print(len(elements))
+            i = x*100 + 0
+            for element in elements:
+                # 标准编号，标准标题，实施日期，作废日期，标准状态，下载链接
+                standard = []
+                element_child = element.find_elements(By.CLASS_NAME, 'ant-table-row-cell-break-word')
+                standard.append(element_child[1].text)
+                standard.append(element_child[2].text)
+                try:
+                    standard.append(element_child[6].text)
+                    standard.append('')
+                    standard.append(element_child[4].text)
+                    standard.append('')
+                except:
+                    standard.append('')
+                    standard.append('')
+                    standard.append('')
+                    standard.append('')
+                standard_list.append(standard)
+                i += 1
+                # print(f'获取广东省地方标准第{i}/{max_num}条')
+            driver.find_element(By.XPATH, '//*[@id="app"]/div/div[3]/div/div[5]/div/div/div/ul/li[5]').click()
+            time.sleep(1)
+        print(standard_list)
         return standard_list
 
     def Jiangsu():
@@ -210,11 +303,7 @@ class DB_data_get():
         driver = webdriver.Chrome(options=chrome_options) 
         driver.get(url)    
         driver.implicitly_wait(5)
-        # pattern = r'查询到相关标准(.*?)条'
-        # total_page = int(re.findall(pattern, driver.page_source, re.S)[0])
-        # print(total_page)
         max_page = driver.find_element(By.CSS_SELECTOR, '#layui-laypage-1 > a.layui-laypage-last').text
-        # print(max_page)
         standard_list = []
         for i in range(1, int(max_page)+1):
             url = "https://bz.zjamr.zj.gov.cn/public/std/list/DB/{}.html".format(i)
@@ -261,48 +350,6 @@ class DB_data_get():
     def Hunan():
         pass
 
-    def Guangdong():
-        chrome_options = Options() # 实例化option对象
-        chrome_options.add_argument("--headless") # 把Chrome浏览器设置为静默模式
-        chrome_options.add_argument('--disable-gpu') # 禁止加载图片
-        chrome_options.add_argument('log-level=3')
-        driver = webdriver.Chrome(options=chrome_options) 
-        driver.implicitly_wait(10)
-        url = 'https://bzgl.gdcic.net/#/home/tabsBZ'
-        driver.get(url)
-        driver.find_element(By.XPATH, '//*[@id="app"]/div/div[3]/div/div[5]/div/div/div/ul/li[11]/div/div').click()
-        driver.find_element(By.XPATH, '/html/body/div[1]/div/div[3]/div/div[5]/div/div/div/ul/li[11]/div[2]/div/div/div/ul/li[4]').click()
-        time.sleep(1)
-        max_num = driver.find_element(By.XPATH, '//*[@id="app"]/div/div[3]/div/div[5]/div/div/div/ul/li[1]').text.split(' ')[1]
-        standard_list = []
-        for x in range(int(max_num)//100+1):
-            elements = driver.find_elements(By.XPATH, '//*[@id="app"]/div/div[3]/div/div[5]/div/div/div/div/div/div/table/tbody/tr')
-            # print(len(elements))
-            i = x*100 + 0
-            for element in elements: 
-                # 标准编号，标准标题，实施日期，作废日期，标准状态，下载链接
-                standard = []
-                element_child = element.find_elements(By.CLASS_NAME, 'ant-table-row-cell-break-word')
-                standard.append(element_child[1].text)
-                standard.append(element_child[2].text)
-                try:
-                    standard.append(element_child[6].text)
-                    standard.append('')
-                    standard.append(element_child[4].text)
-                    standard.append('')
-                except:
-                    standard.append('')
-                    standard.append('')
-                    standard.append('')
-                    standard.append('')
-                standard_list.append(standard)
-                i += 1
-                # print(f'获取广东省地方标准第{i}/{max_num}条')
-            driver.find_element(By.XPATH, '//*[@id="app"]/div/div[3]/div/div[5]/div/div/div/ul/li[5]').click()
-            time.sleep(1)
-        print(standard_list)
-        return standard_list
-
     def Guangxi():
         pass
 
@@ -311,51 +358,6 @@ class DB_data_get():
 
     def Chongqing():
         pass
-
-    def Sichuan():
-        SiChuan_URL = "http://jst.sc.gov.cn/scjst/bzgf/zhuanlan.shtml"
-        data_list = []
-        result_list = []
-        total_html = ""
-        try:
-            url = "http://jst.sc.gov.cn/scjst/bzgf/2023/3/13/ded7b643735240758041911d7f30f084.shtml"
-            response = requests.get(url)
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.content, "html.parser")                # 定位表格元素
-                table = soup.find("table")                # 遍历表格行并提取数据
-                for row in table.find_all("tr"):
-                    row_data = [cell.get_text(strip=True) for cell in row.find_all(["th", "td"])]
-                    data_list.append(row_data)
-                data_list.pop(0)
-                for i in range(len(data_list)): #因为表格的原因，如果有缺少一列的情况，从此循环遍历补齐
-                    if len(data_list[i]) == 6:
-                        data_list[i] = [""] + data_list[i]
-                for i in range(len(data_list)): #状态空白的补充”现行“
-                    if len(data_list[i][6]) == 0:
-                        data_list[i][6] = '现行'
-                for i in range(len(data_list)):
-                    result_list.append([data_list[i][2],data_list[i][3],data_list[i][5],'',data_list[i][6],''])
-                # 以上为获取总目录及规范编号，以下为获取所有的下载链接
-            url = "http://jst.sc.gov.cn/scjst/bzgf/zhuanlan.shtml"
-            response = requests.get(url)
-            if response.status_code == 200:
-                total_html = total_html + response.text
-            for i in range(8):
-                url = "http://jst.sc.gov.cn/scjst/bzgf/zhuanlan" + "_" + str(i+2) + ".shtml"
-                response = requests.get(url)
-                if response.status_code == 200:
-                    total_html = total_html + response.text
-            pattern = r'title="【四川省.*?】(.*?)" href="(.*?)" target='
-            SiChuan_URL = re.findall(pattern, total_html, re.S)
-            for i in range(len(result_list)):
-                for j in range(len(SiChuan_URL)):
-                    if str(result_list[i][1]) in str(SiChuan_URL[j][0]):
-                        result_list[i][5] = str('http://jst.sc.gov.cn' + "/" + SiChuan_URL[j][1])[:-6] + "/files/" + urllib.parse.quote(result_list[i][1], safe='') + ".pdf"
-                        break
-                print(result_list[i])
-            return result_list
-        except RequestException:
-            return result_list
 
     def Guizhou():
         pass
@@ -389,7 +391,21 @@ class DB_data_get():
 
     def Macau():
         pass
-        
+
+    def Sanxi():
+        pass
+
+    def Neimenggu():
+        pass
+
+    def Liaoning():
+        pass
+
+    def Jilin():
+        pass
+
+    def Heilongjiang():
+        pass
     
 
 def read_cell_data(sheet, i, j):
@@ -409,6 +425,70 @@ def wash_data(data):
     #     fp.write(str(soup))
     print(soup.find_all('.*?<font color="#000000">(.*?)</font>.*?'))
 
+class format_data():
+    def F_Hebei(input_str):
+        # 去除字符串中的空格
+        input_str = input_str.replace(" ", "")
+        # 使用正则表达式匹配不同格式的字符串
+        match = re.search(r'(DB13JT|DB13J|DBJT02)(\d+)-(\d{4})', input_str)
+
+        if match:
+            code, number, year = match.groups()
+            formatted_str = f'{code}-{number}-{year}'
+            return formatted_str
+        else:
+            # 如果输入字符串不匹配预期格式，返回原始字符串
+            return input_str
+
+    def F_Shanghai(input_str):
+        # 去除字符串中的空格
+        input_str = input_str.replace(" ", "")
+        input_str = input_str.replace('\\', '/')
+        input_str = input_str.replace('DGTJ', 'DG/TJ')
+        # 使用正则表达式匹配不同格式的字符串
+        match = re.search(r'(DG/TJ08|DGJ08|DBJT08)(\d+)-(\d{4})', input_str)
+        if match:
+            code, number, year = match.groups()
+            formatted_str = f'{code}-{number}-{year}'
+            return formatted_str
+        else:
+            # 如果输入字符串不匹配预期格式，返回原始字符串
+            return input_str
+    def F_Beijing(input_str):
+        # 去除字符串中的空格
+        input_str = input_str.replace(" ", "")
+        input_str = input_str.replace("DB11/", "DB11")
+        # 使用正则表达式匹配不同格式的字符串
+        if "." in input_str:
+            match = re.search(r'(DB11T\s?\d+\.\d+)-(\d{4})', input_str)
+            if match:
+                code_version, year = match.groups()
+                # # 将版本号中的小数点前面插入一个短横线“-”
+                parts = code_version.split('.')
+                formatted_version = '.'.join(parts)
+                formatted_version = formatted_version.replace("DB11T", "")
+                formatted_str = f'DB11/T-{formatted_version}-{year}'
+                return formatted_str
+            else:
+                # 如果输入字符串不匹配预期格式，返回原始字符串
+                return input_str
+        else:
+            match = re.search(r'(DB11T|DB11|)(\d+)-(\d{4})', input_str)
+            if match:
+                code, number, year = match.groups()
+                formatted_str = f'{code}-{number}-{year}'
+                formatted_str = formatted_str.replace("DB11T","DB11/T")
+                return formatted_str
+            else:
+                # 如果输入字符串不匹配预期格式，返回原始字符串
+                return input_str
+    def F_Sichuan(input_str):
+        # 去除字符串中的空格
+        input_str = input_str.replace('DB51/T', 'DB51T-')
+        input_str = input_str.replace('DBJ51/T', 'DBJ51T-')
+        input_str = input_str.replace('DBJ51/', 'DBJ51-')
+        input_str = input_str.replace('DB51/', 'DB51-')
+        return input_str
 if __name__ == "__main__":
     print(DB_data_get.Tianjin())
 

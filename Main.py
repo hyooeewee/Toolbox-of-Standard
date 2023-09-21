@@ -3,21 +3,18 @@
 # @FileName  :main.py
 # @Time      :2023/09/28 10:40:35
 # @Author    :hyooeewee,Mason_Lee
-
 import ctypes
+import re
 import sqlite3
 import sys
 import time
 import os
 import datetime
-import webbrowser
-import threading
 from configparser import ConfigParser
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtCore import Qt, pyqtSignal, QThread
-from PyQt5.QtGui import QCursor, QIcon, QMoveEvent
-from PyQt5.QtWidgets import (QApplication, QFileDialog, QMainWindow, QMessageBox, QPushButton, QTableWidgetItem,QTableView)
-from PyQt5.QtNetwork import QLocalSocket, QLocalServer
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QCursor, QIcon
+from PyQt5.QtWidgets import (QApplication, QFileDialog, QMainWindow, QMessageBox,QTableWidgetItem)
 from standards_spider import *
 from UI.res_rc import *
 
@@ -67,13 +64,7 @@ class LoginWindow(QMainWindow): #登录界面的相关函数
         self.setAttribute(Qt.WA_TranslucentBackground)  # 设置背景透明和图标
         self.label.setStyleSheet('background-color: white;')  # 设置标签
         self.setWindowIcon(QIcon(r'Logo.ico'))  # 设置标题栏logo为Logo.ico
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-            "myappid")  # myappid是一个占位符，后边可以改成需要的AppUserModelID替换，这个ID是win系统中应用程序的唯一识别码，用于在任务栏中的分组
-        # self.shadow = QtWidgets.QGraphicsDropShadowEffect(self)                                   # 添加阴影
-        # self.shadow.setOffset(0, 0)                                                               # 设置阴影的偏移值，第一个参数为左右偏移，第二个参数为上下偏移
-        # self.shadow.setBlurRadius(20)                                                             # 设置阴影的范围
-        # self.shadow.setColor(Qt.gray)                                                             # 设置阴影的颜色
-        # self.ui.frame.setGraphicsEffect(self.shadow)                                              # 创建阴影对象
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("myappid")  # myappid是一个占位符，后边可以改成需要的AppUserModelID替换，这个ID是win系统中应用程序的唯一识别码，用于在任务栏中的分组
         self.ui.pushButton_Login.clicked.connect(lambda: self.ui.stackedWidget_2.setCurrentIndex(0))  # 登录页切换
         self.ui.pushButton_Register.clicked.connect(lambda: self.ui.stackedWidget_2.setCurrentIndex(1))  # 注册页切换
         self.ui.pushButton_LSure.clicked.connect(self.local_login)  # 点击登录按钮，连接至login函数
@@ -203,15 +194,23 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_Home.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
         self.ui.pushButton_Check.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
         self.ui.pushButton_CheckList.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
-        self.ui.pushButton_My.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
+        self.ui.pushButton_Generate.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
+        self.ui.pushButton_News.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(4))
+        self.ui.pushButton_My.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(5))
         # page 1
         self.ui.label_LocalDB_V.setText(str(datetime.datetime.fromtimestamp(os.path.getmtime(os.getcwd()+ "/Database/users.db"))))
+        self.ui.label_UserName.setText(str(USER))
         self.ui.pushButton_Export.clicked.connect(self.show_confirmation_dialog)
         # page 2
         self.ui.comboBox_1.currentIndexChanged.connect(self.standard_CB1)
         self.ui.comboBox_2.hide()
         self.ui.comboBox_2.addItems(['不限'] + [x[0] for x in PROVINCE_CODE])
-        # self.ui.comboBox_2.currentIndexChanged.connect(self.standard_CB2)
+        self.tableWidget.setColumnWidth(0, 120)
+        self.tableWidget.setColumnWidth(1, 190)
+        self.tableWidget.setColumnWidth(2, 80)
+        self.tableWidget.setColumnWidth(3, 80)
+        self.tableWidget.setColumnWidth(4, 80)
+        self.tableWidget.setColumnWidth(5, 80)
         self.ui.pushButton_Search.clicked.connect(self.search)
         self.ui.tableWidget.resizeColumnsToContents()
         self.ui.tableWidget.resizeRowsToContents()
@@ -223,12 +222,6 @@ class MainWindow(QMainWindow):
         # page 4
         self.ui.pushButton_MSure.clicked.connect(self.change_password)
         self.show()
-        self.tableWidget.setColumnWidth(0, 120)
-        self.tableWidget.setColumnWidth(1, 190)
-        self.tableWidget.setColumnWidth(2, 80)
-        self.tableWidget.setColumnWidth(3, 80)
-        self.tableWidget.setColumnWidth(4, 80)
-        self.tableWidget.setColumnWidth(5, 80)
 
     def standard_CB1(self):
         level = self.ui.comboBox_1.currentText()
@@ -241,16 +234,11 @@ class MainWindow(QMainWindow):
         level = self.ui.comboBox_1.currentText()
         state = self.ui.comboBox_2.currentText()
         status = self.ui.comboBox_3.currentText()
-
         def regexp(expr, item):
             reg = re.compile(expr)
             return reg.search(item) is not None
-            # print(f'level = {level}, state = {state}')
-
         conn = sqlite3.connect(DATABASE_PATH)
         cur = conn.cursor()
-        # if state in ['不限']:
-        #     # QMessageBox.warning(self, "提示", "查询中...")
         pattarn = p1 = p2 = p3 = ''
         if level == '国标':
             pattarn = 'GB'
@@ -270,13 +258,12 @@ class MainWindow(QMainWindow):
             p2 = f"Status='{status}'"
         if self.ui.lineEdit_Search.text():
             p3 = f"(StandardNumbers  LIKE '%{self.ui.lineEdit_Search.text()}%' OR StandardNames LIKE '%{self.ui.lineEdit_Search.text()}%')"
-        # print(pattarn)
         if p1:
             pattarn = p1
             if p2:
                 pattarn += ' AND ' + p2
-            if p3:
-                pattarn += ' AND ' + p3
+                if p3:
+                    pattarn += ' AND ' + p3
         elif p2:
             pattarn = p2
             if p3:
@@ -285,15 +272,12 @@ class MainWindow(QMainWindow):
             pattarn = p3
         else:
             pattarn = ''
-        # print(pattarn)
         if pattarn:
             conn.create_function("REGEXP", 2, regexp)
-            # print(f"SELECT * FROM standards WHERE {pattarn}")
             cur.execute(f"SELECT * FROM standards WHERE {pattarn}")
         else:
             cur.execute("SELECT * FROM standards")
         data = cur.fetchall()
-        # print(data)
         conn.commit()
         conn.close()
         y = len(data)
@@ -322,8 +306,7 @@ class MainWindow(QMainWindow):
         # 调用QFileDialog.getOpenFileName方法，弹出文件选择窗口
         # 参数依次为：父窗口、标题、默认目录、文件类型过滤器、选项
         directory = QtWidgets.QFileDialog.getExistingDirectory(self, "选取文件夹", os.getcwd())
-        # 如果用户选择了文件，打印文件名
-        if directory:
+        if directory:           # 如果用户选择了文件，打印文件名
             self.ui.lineEdit_CLOpen2.setText(directory)
 
     def update(self):
@@ -356,17 +339,50 @@ class MainWindow(QMainWindow):
             self.ui.label_MWrong.setText('输入不完整！')
 
     def export(self):   #数据库操作的部分单独拿出来，data从get_data里边获取，方便日后修改至远程端
+        # data = DB_data_get.Beijing()
+        # data = DB_data_get.Tianjin()
+        # data = DB_data_get.Hebei()
+        # data = DB_data_get.Shanghai()
         data = DB_data_get.Sichuan()
-        if data:  # 将data逐条写入数据库
+
+
+        # data = DB_data_get.Sanxi()
+        # data = DB_data_get.Neimenggu()
+        # data = DB_data_get.Liaoning()
+        # data = DB_data_get.Jilin()
+        # data = DB_data_get.Heilongjiang()
+        # data = DB_data_get.Jiangsu()
+        # data = DB_data_get.ZheJiang()
+        # data = DB_data_get.Anhui()
+        # data = DB_data_get.Fujian()
+        # data = DB_data_get.Jiangxi()
+        # data = DB_data_get.Shandong()
+        # data = DB_data_get.Henan()
+        # data = DB_data_get.Hubei()
+        # data = DB_data_get.Hunan()
+        # data = DB_data_get.Guangdong()
+        # data = DB_data_get.Guangxi()
+        # data = DB_data_get.Hainan()
+        # data = DB_data_get.Chongqing()
+        # data = DB_data_get.Guizhou()
+        # data = DB_data_get.Yunnan()
+        # data = DB_data_get.Xizang()
+        # data = DB_data_get.Shanxi()
+        # data = DB_data_get.Gansu()
+        # data = DB_data_get.Qinghai()
+        # data = DB_data_get.Ningxia()
+        # data = DB_data_get.Xinjiang()
+        # data = DB_data_get.Taiwan()
+        # data = DB_data_get.Hongkong()
+        # data = DB_data_get.Macau()
+        if data:
             conn = sqlite3.connect(DATABASE_PATH)
             cur = conn.cursor()
             for i in data:
                 try:
-                    cur.execute(
-                        f"insert into standards values('{i[0]}','{i[1]}','{i[2]}','{i[3]}','{i[4]}','{i[5]}')")
+                    cur.execute(f"insert into standards values('{i[0]}','{i[1]}','{i[2]}','{i[3]}','{i[4]}','{i[5]}','{i[6]}','{i[7]}','{i[8]}')")
                 except:
-                    cur.execute(
-                        f"update standards set StandardNames='{i[1]}',StartDate='{i[2]}', EndDate='{i[3]}',Status='{i[4]}',DownloadLinks='{i[5]}' where StandardNumbers='{i[0]}'")
+                    cur.execute(f"update standards set StandardNames='{i[1]}',StartDate='{i[2]}', EndDate='{i[3]}',Status='{i[4]}',DownloadLinks='{i[5]}',TYPE='{i[6]}',HEADERS='{i[7]}',UPDATE_TIME='{i[8]}' where StandardNumbers='{i[0]}'")
             conn.commit()
             conn.close()
             self.ui.label_LocalDB_V.setText(str(datetime.datetime.fromtimestamp(
