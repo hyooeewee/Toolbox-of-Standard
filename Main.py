@@ -16,7 +16,9 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor, QIcon
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QMainWindow, QMessageBox,QTableWidgetItem)
 from standards_spider import *
+from GB_Standards_Spider import *
 from UI.res_rc import *
+
 
 INI_PATH = r"config.ini"
 DATABASE_PATH = r'.\Database\users.db'
@@ -339,11 +341,12 @@ class MainWindow(QMainWindow):
             self.ui.label_MWrong.setText('输入不完整！')
 
     def export(self):   #数据库操作的部分单独拿出来，data从get_data里边获取，方便日后修改至远程端
+        data = GB_get_all()
         # data = DB_data_get.Beijing()
         # data = DB_data_get.Tianjin()
         # data = DB_data_get.Hebei()
         # data = DB_data_get.Shanghai()
-        data = DB_data_get.Sichuan()
+        # data = DB_data_get.Sichuan()
 
 
         # data = DB_data_get.Sanxi()
