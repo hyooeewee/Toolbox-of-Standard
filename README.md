@@ -48,5 +48,8 @@
 - [ ] IP代理池部署
 - [ ] 完成国标爬取
 
+## 2023-9-25
+- [ ] 数据上云！
+
 
 > 目前已经完成软件的打包发布，可以从此处[<img src="https://www.emojiall.com/images/60/openmoji/1.0/1f4e5.png" width="25px" height="25px">](https://github.com/hyooeewee/Toolbox-of-Standard/tags)下载需要的版本
