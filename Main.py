@@ -3,6 +3,16 @@
 # @FileName  :main.py
 # @Time      :2023/09/28 10:40:35
 # @Author    :hyooeewee,Mason_Lee
+import sys
+# 设置递归深度限制
+new_limit = 5000  # 你可以根据需要设置新的限制
+sys.setrecursionlimit(new_limit)
+import sys
+
+# 设置递归深度限制
+new_limit = 5000  # 你可以根据需要设置新的限制
+sys.setrecursionlimit(new_limit)
+
 import ctypes
 import re
 import sqlite3
@@ -10,7 +20,9 @@ import sys
 import time
 import os
 import datetime
+import urllib
 from configparser import ConfigParser
+import pymysql
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor, QIcon
@@ -28,6 +40,13 @@ PASSWORD = ''
 AUTO_LOGIN = 0
 REMEMBER_PASSWORD = 0
 PROVINCE_CODE = []
+online_db_config = {
+    'host': '123.60.58.210',  # 远程MySQL数据库的主机地址（IP地址或域名）
+    'user': 'root',  # 远程MySQL数据库的用户名
+    'password': '123456',  # 远程MySQL数据库的密码
+    'database': 'standard_db',  # 要连接的数据库名称
+    'port': 3306  # MySQL默认端口号
+}
 class MyConfigParser(ConfigParser):
     '''重写类，取消大小写不敏感'''
     def optionxform(self, optionstr):
@@ -200,7 +219,8 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_News.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(4))
         self.ui.pushButton_My.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(5))
         # page 1
-        self.ui.label_LocalDB_V.setText(str(datetime.datetime.fromtimestamp(os.path.getmtime(os.getcwd()+ "/Database/users.db"))))
+        self.ui.label_LocalDB_V.setText(str(datetime.datetime.fromtimestamp(os.path.getmtime(os.getcwd()+ "/Database/users.db"))).split('.')[0])
+        self.ui.label_OnlineDB_V.setText(self.online_db_version())
         self.ui.label_UserName.setText(str(USER))
         self.ui.pushButton_Export.clicked.connect(self.show_confirmation_dialog)
         # page 2
@@ -217,6 +237,7 @@ class MainWindow(QMainWindow):
         self.ui.tableWidget.resizeColumnsToContents()
         self.ui.tableWidget.resizeRowsToContents()
         self.ui.tableWidget.resizeColumnsToContents()
+        self.ui.pushButton_DownLoad.clicked.connect(self.PDF_DOWNLOAD)
         # page 3
         self.ui.pushButton_CLOpen1.clicked.connect(self.select_file1)
         self.ui.pushButton_CLOpen2.clicked.connect(self.select_file2)
@@ -340,56 +361,59 @@ class MainWindow(QMainWindow):
             self.ui.stackedWidget_2.setCurrentIndex(1)
             self.ui.label_MWrong.setText('输入不完整！')
 
-    def export(self):   #数据库操作的部分单独拿出来，data从get_data里边获取，方便日后修改至远程端
-        data = GB_get_all()
-        # data = DB_data_get.Beijing()
-        # data = DB_data_get.Tianjin()
-        # data = DB_data_get.Hebei()
-        # data = DB_data_get.Shanghai()
-        # data = DB_data_get.Sichuan()
-
-
-        # data = DB_data_get.Sanxi()
-        # data = DB_data_get.Neimenggu()
-        # data = DB_data_get.Liaoning()
-        # data = DB_data_get.Jilin()
-        # data = DB_data_get.Heilongjiang()
-        # data = DB_data_get.Jiangsu()
-        # data = DB_data_get.ZheJiang()
-        # data = DB_data_get.Anhui()
-        # data = DB_data_get.Fujian()
-        # data = DB_data_get.Jiangxi()
-        # data = DB_data_get.Shandong()
-        # data = DB_data_get.Henan()
-        # data = DB_data_get.Hubei()
-        # data = DB_data_get.Hunan()
-        # data = DB_data_get.Guangdong()
-        # data = DB_data_get.Guangxi()
-        # data = DB_data_get.Hainan()
-        # data = DB_data_get.Chongqing()
-        # data = DB_data_get.Guizhou()
-        # data = DB_data_get.Yunnan()
-        # data = DB_data_get.Xizang()
-        # data = DB_data_get.Shanxi()
-        # data = DB_data_get.Gansu()
-        # data = DB_data_get.Qinghai()
-        # data = DB_data_get.Ningxia()
-        # data = DB_data_get.Xinjiang()
-        # data = DB_data_get.Taiwan()
-        # data = DB_data_get.Hongkong()
-        # data = DB_data_get.Macau()
-        if data:
+    def export(self):   #从服务器端更新本地数据库
+        connection = pymysql.connect(**online_db_config)
+        try:
+            # 创建一个数据库游标对象
+            with connection.cursor() as cursor:
+                # 执行 SQL 查询
+                sql_query = "SELECT * FROM STANDARD"
+                cursor.execute(sql_query)
+                # 获取所有行的结果
+                rows = cursor.fetchall()
+                # 将结果转换为列表
+                result_list = list(rows)
+        finally:
+            # 关闭数据库连接
+            connection.close()
+        if result_list:
             conn = sqlite3.connect(DATABASE_PATH)
             cur = conn.cursor()
-            for i in data:
+            for i in result_list:
                 try:
-                    cur.execute(f"insert into standards values('{i[0]}','{i[1]}','{i[2]}','{i[3]}','{i[4]}','{i[5]}','{i[6]}','{i[7]}','{i[8]}')")
+                    cur.execute(f"insert into standards values('{i[0]}','{i[2]}','{i[3]}','{i[4]}','{i[5]}','{i[6]}','{i[7]}','{i[1]}','{i[8]}')")
                 except:
-                    cur.execute(f"update standards set StandardNames='{i[1]}',StartDate='{i[2]}', EndDate='{i[3]}',Status='{i[4]}',DownloadLinks='{i[5]}',TYPE='{i[6]}',HEADERS='{i[7]}',UPDATE_TIME='{i[8]}' where StandardNumbers='{i[0]}'")
+                    cur.execute(f"update standards set StandardNames='{i[2]}',StartDate='{i[3]}', EndDate='{i[4]}',Status='{i[5]}',DownloadLinks='{i[6]}',TYPE='{i[1]}',HEADERS='{i[7]}',UPDATE_TIME='{i[8]}' where StandardNumbers='{i[0]}'")
             conn.commit()
             conn.close()
             self.ui.label_LocalDB_V.setText(str(datetime.datetime.fromtimestamp(
-                os.path.getmtime(os.getcwd() + "/Database/users.db"))))  # 数据库写入完成后，更新本地数据库时间
+                os.path.getmtime(os.getcwd() + "/Database/users.db"))).split(".")[0])  # 数据库写入完成后，更新本地数据库时间
+
+    def online_db_version(self):
+        time_list = []
+        connection = pymysql.connect(**online_db_config)
+        try:
+            # 创建一个数据库游标对象
+            with connection.cursor() as cursor:
+                # 执行 SQL 查询
+                sql_query = "SELECT * FROM STANDARD"
+                cursor.execute(sql_query)
+                # 获取所有行的结果
+                rows = cursor.fetchall()
+                # 将结果转换为列表
+                result_list = list(rows)
+        finally:
+            # 关闭数据库连接
+            connection.close()
+        for i in range(len(result_list)): # 提取全部的时间，转换成datetime对象
+            print(result_list[i][8])
+            time_list.append(datetime.datetime.strptime(result_list[i][8],"%Y-%m-%d %H:%M:%S.%f"))
+        result = time_list[0]
+        for i in range(len(time_list)):
+            if result < time_list[i]:
+                result_time = time_list[i]
+            print("循环" + str(i) + "次")
+        return str(result_time).split('.')[0]
 
     def show_confirmation_dialog(self):
         # 创建一个确认对话框
@@ -406,6 +430,52 @@ class MainWindow(QMainWindow):
         else:
             print("操作已取消")
 
+    def PDF_DOWNLOAD(self):
+        link = ""
+        name = ""
+        selected_row = self.tableWidget.currentRow()
+        if selected_row != -1:  # 检查是否有行被选中（-1 表示没有行被选中）
+            row_data = []
+            column_count = self.tableWidget.columnCount()  # 获取列数
+            for column in range(column_count):
+                item = self.tableWidget.item(selected_row, column)  # 获取选中行的每个单元格的 QTableWidgetItem 对象
+                if item is not None:
+                    row_data.append(item.text())  # 获取单元格中的文本数据
+            # 现在，row_data 列表包含了选中行的数据
+            print(row_data)
+            link = row_data[5]
+            if "无" in link:
+                print('无链接')
+            elif len(link) < 10:
+                print('无链接')
+            else:
+                name = str(row_data[0]) + " " + str(row_data[1])
+                name = name.replace("/","-")
+                options = QFileDialog.Options()
+                options |= QFileDialog.ReadOnly  # 使对话框只读
+                # 获取用户选择的路径
+                desktop_dir = os.path.expanduser("~/Desktop")
+                selected_path = QFileDialog.getExistingDirectory(self, '选择路径', options=options, directory=desktop_dir)
+                if selected_path:
+                    print(f'选择的路径为: {selected_path}')
+                    file_address = selected_path + "\\" + name + ".pdf"
+                    print(file_address)
+                    urllib.request.urlretrieve(link, file_address)
+                else:
+                    print('未选择路径')
+        else:
+            print("没有选中行")
+
+
+    def get_desktop_path(self): #获取桌面的路径，作为默认存储路径
+        home_path = os.path.expanduser("~")
+        if os.name == "posix":  # macOS or Linux
+            desktop_path = os.path.join(home_path, "Desktop")
+        elif os.name == "nt":  # Windows
+            desktop_path = os.path.join(home_path, "Desktop")
+        else:
+            desktop_path = None
+        return desktop_path
 def save_setting():
     print('save setting')
     pass
@@ -421,8 +491,6 @@ def source_path(relative_path):
     else:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
-
-
 
 if __name__ == "__main__":
     # 修改当前工作目录，使得资源文件可以被正确访问，打包需要

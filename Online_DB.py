@@ -56,7 +56,7 @@ def data_transmit():
     data_to_insert = sqlite_cursor.fetchall()
     i = 1
     for row in data_to_insert:
-        mysql_cursor.execute('INSERT INTO STANDARD (SN, NAME, START_DATE, END_DATE , STATUS, LINK, TYPE, RE_HEADERS, UPDATE_TIME) '
+        mysql_cursor.execute('INSERT INTO STANDARD (SN, TYPE, NAME, START_DATE, END_DATE , STATUS, LINK, RE_HEADERS, UPDATE_TIME) '
                              'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)', row)
         i = i + 1
         print("共计" + str(len(data_to_insert)) + "条数据，当前已插入完成" + str(i) + "条！")
