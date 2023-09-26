@@ -3,10 +3,17 @@
 # @FileName  :standards_spider.py
 # @Time      :2023/02/20 13:40:11
 # @Author    :Hughie Wei
+
+import codecs
+import json
+import random
 import re
 import time
 import urllib
 import datetime
+import chardet
+import lxml
+import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from requests.exceptions import RequestException
@@ -482,6 +489,7 @@ class format_data():
         input_str = input_str.replace('DBJ51/', 'DBJ51-')
         input_str = input_str.replace('DB51/', 'DB51-')
         return input_str
+
 if __name__ == "__main__":
     print(DB_data_get.Tianjin())
 
