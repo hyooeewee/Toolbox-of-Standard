@@ -3,17 +3,10 @@
 # @FileName  :standards_spider.py
 # @Time      :2023/02/20 13:40:11
 # @Author    :Hughie Wei
-
-import codecs
-import json
-import random
 import re
 import time
 import urllib
 import datetime
-import chardet
-import lxml
-import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from requests.exceptions import RequestException
