@@ -7,12 +7,6 @@ import sys
 # 设置递归深度限制
 new_limit = 5000  # 你可以根据需要设置新的限制
 sys.setrecursionlimit(new_limit)
-import sys
-
-# 设置递归深度限制
-new_limit = 5000  # 你可以根据需要设置新的限制
-sys.setrecursionlimit(new_limit)
-
 import ctypes
 import re
 import sqlite3
