@@ -11,14 +11,14 @@ import time
 import os
 import datetime
 import urllib
+import urllib.request
 from configparser import ConfigParser
 import pymysql
+import requests
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor, QIcon
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QMainWindow, QMessageBox, QTableWidgetItem)
-from standards_spider import *
-from GB_Standards_Spider import *
 from UI.res_rc import *
 
 INI_PATH = r"config.ini"
@@ -133,7 +133,7 @@ class LoginWindow(QMainWindow):  # 登录界面的相关函数
             REMEMBER_PASSWORD = 0
             self.ui.checkBox_AutoLogin.setChecked(AUTO_LOGIN)
 
-    def local_login(self):
+    def local_login(self):  #获取输入的账号和密码，与本地数据库进行比对，这个函数后期要改成在线验证，通过GET获取
         global UID, USER, PASSWORD
         account = self.ui.lineEdit_LAccount.text()
         password = self.ui.lineEdit_LPassword.text()
@@ -144,7 +144,6 @@ class LoginWindow(QMainWindow):  # 登录界面的相关函数
             rows = cur.fetchall()
             conn.commit()
             conn.close()
-            # print(rows)
             if rows:
                 for row in rows:
                     if row[1] == password:
@@ -163,11 +162,11 @@ class LoginWindow(QMainWindow):  # 登录界面的相关函数
             self.ui.stackedWidget.setCurrentIndex(1)
             self.ui.label_Wrong.setText('账号或密码不能为空！')
 
-    def forget_password(self):
+    def forget_password(self):  #忘记密码
         self.ui.stackedWidget.setCurrentIndex(1)
         self.ui.label_Wrong.setText('功能研发中！')
 
-    def register(self):
+    def register(self):     #注册账户，和本地数据库进行比对
         account = self.ui.lineEdit_RAccount.text()
         password1 = self.ui.lineEdit_RPassword1.text()
         password2 = self.ui.lineEdit_RPassword2.text()
@@ -461,9 +460,20 @@ class MainWindow(QMainWindow):
                 selected_path = QFileDialog.getExistingDirectory(self, '选择路径', options=options, directory=desktop_dir)
                 if selected_path:
                     print(f'选择的路径为: {selected_path}')
-                    file_address = selected_path + "\\" + name + ".pdf"
+                    file_address = selected_path + "/" + name + ".pdf"
                     print(file_address)
-                    urllib.request.urlretrieve(link, file_address)
+                    print(link)
+                    try:
+                        urllib.request.urlretrieve(link, file_address)
+                    except:
+                        print('下载失败')
+                        confirmation = QMessageBox()
+                        confirmation.setWindowTitle("下载失败")
+                        confirmation.setText("下载失败，请检查网络连接")
+                        confirmation.setIcon(QMessageBox.Question)
+                        confirmation.setStandardButtons(QMessageBox.Ok)
+                        # 显示对话框并获取用户的选择
+                        user_choice = confirmation.exec_()
                 else:
                     print('未选择路径')
         else:
@@ -495,12 +505,10 @@ def source_path(relative_path):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
-
 if __name__ == "__main__":
     # 修改当前工作目录，使得资源文件可以被正确访问，打包需要
     cd = source_path('')
     os.chdir(cd)
-
     load_setting()
     load_json()
     app = QApplication(sys.argv)
