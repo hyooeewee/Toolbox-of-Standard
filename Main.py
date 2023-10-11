@@ -14,7 +14,6 @@ import urllib
 import urllib.request
 from configparser import ConfigParser
 import pymysql
-import requests
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor, QIcon
@@ -37,13 +36,11 @@ online_db_config = {
     'port': 3306  # MySQL默认端口号
 }
 
-
 class MyConfigParser(ConfigParser):
     '''重写类，取消大小写不敏感'''
 
     def optionxform(self, optionstr):
         return optionstr
-
 
 def load_setting():
     global UID, USER, PASSWORD, AUTO_LOGIN, REMEMBER_PASSWORD, PROVINCE_CODE
@@ -267,18 +264,20 @@ class MainWindow(QMainWindow):
             pattarn = 'GB'
         elif level == '地标':
             pattarn = 'DB'
-            if state != '不限':
-                pattarn += [x[1] for x in PROVINCE_CODE if x[0] == state][0]
         elif level == '行标':
-            pattarn = ''
+            pattarn = 'JG'
         elif level == '团标':
             pattarn = ''
         else:
             pattarn = ''
         if pattarn:
             p1 = f"StandardNumbers REGEXP '^{pattarn}'"
+            if state != '不限':
+                p1 += ' AND ' + f"TYPE REGEXP '^{state[:2]}'"
         if status != '不限':
-            p2 = f"Status='{status}'"
+            p2 = f"Status REGEXP '^{status}'"
+        else:
+            p2 = f"Status REGEXP '^'"
         if self.ui.lineEdit_Search.text():
             p3 = f"(StandardNumbers  LIKE '%" \
                  f"{self.ui.lineEdit_Search.text()}%' OR StandardNames LIKE '%{self.ui.lineEdit_Search.text()}%')"
@@ -288,6 +287,7 @@ class MainWindow(QMainWindow):
                 pattarn += ' AND ' + p2
                 if p3:
                     pattarn += ' AND ' + p3
+                    print(pattarn)
         elif p2:
             pattarn = p2
             if p3:
@@ -299,6 +299,7 @@ class MainWindow(QMainWindow):
         if pattarn:
             conn.create_function("REGEXP", 2, regexp)
             cur.execute(f"SELECT * FROM standards WHERE {pattarn}")
+            print(pattarn)
         else:
             cur.execute("SELECT * FROM standards")
         data = cur.fetchall()
@@ -513,5 +514,4 @@ if __name__ == "__main__":
     load_json()
     app = QApplication(sys.argv)
     win = LoginWindow()
-    # win = MainWindow()
     sys.exit(app.exec_())

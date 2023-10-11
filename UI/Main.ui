@@ -855,14 +855,14 @@ QFrame{
                       <attribute name="horizontalHeaderCascadingSectionResizes">
                        <bool>true</bool>
                       </attribute>
-                      <attribute name="horizontalHeaderMinimumSectionSize">
-                       <number>25</number>
-                      </attribute>
                       <attribute name="horizontalHeaderDefaultSectionSize">
                        <number>80</number>
                       </attribute>
                       <attribute name="horizontalHeaderHighlightSections">
                        <bool>true</bool>
+                      </attribute>
+                      <attribute name="horizontalHeaderMinimumSectionSize">
+                       <number>25</number>
                       </attribute>
                       <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
                        <bool>true</bool>
@@ -1079,46 +1079,223 @@ border: none;</string>
                  </item>
                 </layout>
                </widget>
-               <widget class="QWidget" name="page_Directory">
-                <widget class="QLabel" name="label_3">
-                 <property name="geometry">
-                  <rect>
-                   <x>80</x>
-                   <y>320</y>
-                   <width>131</width>
-                   <height>41</height>
-                  </rect>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <family>微软雅黑</family>
-                   <pointsize>14</pointsize>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>功能开发中</string>
-                 </property>
-                </widget>
-               </widget>
+               <widget class="QWidget" name="page_Directory"/>
                <widget class="QWidget" name="page_News">
-                <widget class="QLabel" name="label_5">
+                <widget class="QTableWidget" name="tableWidget_News">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
                  <property name="geometry">
                   <rect>
-                   <x>60</x>
-                   <y>330</y>
-                   <width>131</width>
-                   <height>41</height>
+                   <x>10</x>
+                   <y>90</y>
+                   <width>730</width>
+                   <height>572</height>
                   </rect>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>730</width>
+                   <height>572</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>730</width>
+                   <height>572</height>
+                  </size>
+                 </property>
+                 <property name="sizeIncrement">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
                  </property>
                  <property name="font">
                   <font>
-                   <family>微软雅黑</family>
-                   <pointsize>14</pointsize>
+                   <weight>50</weight>
+                   <bold>false</bold>
                   </font>
                  </property>
-                 <property name="text">
-                  <string>功能开发中</string>
+                 <property name="horizontalScrollBarPolicy">
+                  <enum>Qt::ScrollBarAlwaysOn</enum>
                  </property>
+                 <property name="autoScrollMargin">
+                  <number>16</number>
+                 </property>
+                 <property name="editTriggers">
+                  <set>QAbstractItemView::NoEditTriggers</set>
+                 </property>
+                 <property name="alternatingRowColors">
+                  <bool>true</bool>
+                 </property>
+                 <property name="selectionMode">
+                  <enum>QAbstractItemView::SingleSelection</enum>
+                 </property>
+                 <property name="selectionBehavior">
+                  <enum>QAbstractItemView::SelectRows</enum>
+                 </property>
+                 <property name="sortingEnabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="rowCount">
+                  <number>0</number>
+                 </property>
+                 <attribute name="horizontalHeaderVisible">
+                  <bool>false</bool>
+                 </attribute>
+                 <attribute name="horizontalHeaderCascadingSectionResizes">
+                  <bool>true</bool>
+                 </attribute>
+                 <attribute name="horizontalHeaderDefaultSectionSize">
+                  <number>80</number>
+                 </attribute>
+                 <attribute name="horizontalHeaderHighlightSections">
+                  <bool>true</bool>
+                 </attribute>
+                 <attribute name="horizontalHeaderMinimumSectionSize">
+                  <number>25</number>
+                 </attribute>
+                 <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+                  <bool>true</bool>
+                 </attribute>
+                 <attribute name="horizontalHeaderStretchLastSection">
+                  <bool>true</bool>
+                 </attribute>
+                 <attribute name="verticalHeaderVisible">
+                  <bool>false</bool>
+                 </attribute>
+                 <attribute name="verticalHeaderCascadingSectionResizes">
+                  <bool>true</bool>
+                 </attribute>
+                 <attribute name="verticalHeaderDefaultSectionSize">
+                  <number>25</number>
+                 </attribute>
+                 <attribute name="verticalHeaderHighlightSections">
+                  <bool>true</bool>
+                 </attribute>
+                 <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+                  <bool>true</bool>
+                 </attribute>
+                 <attribute name="verticalHeaderStretchLastSection">
+                  <bool>true</bool>
+                 </attribute>
+                 <column>
+                  <property name="text">
+                   <string>名称</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>发布时间</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>来源</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>原文链接</string>
+                  </property>
+                 </column>
+                </widget>
+                <widget class="QWidget" name="horizontalLayoutWidget_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>20</x>
+                   <y>29</y>
+                   <width>711</width>
+                   <height>61</height>
+                  </rect>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_3">
+                  <item>
+                   <widget class="QComboBox" name="comboBox_5">
+                    <property name="minimumSize">
+                     <size>
+                      <width>160</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>160</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                    <item>
+                     <property name="text">
+                      <string>不限</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>工程建设标准化信息网</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>北京市住建厅</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout_2">
+                    <item>
+                     <widget class="QDateEdit" name="dateEdit"/>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="label_3">
+                      <property name="text">
+                       <string>至</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QDateEdit" name="dateEdit_2"/>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="lineEdit_Search_2">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                    <property name="placeholderText">
+                     <string>请输入需要查询的新闻标题</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_Search_2">
+                    <property name="minimumSize">
+                     <size>
+                      <width>60</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="res.qrc">
+                      <normaloff>:/icons/icons/3917754.png</normaloff>:/icons/icons/3917754.png</iconset>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </widget>
                </widget>
                <widget class="QWidget" name="page_My">
