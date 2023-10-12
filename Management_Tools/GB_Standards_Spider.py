@@ -113,21 +113,12 @@ def GuoBiao_get_PDF(GB_URL,Guid,IP_List):
         response = requests.get(GB_URL, headers=headers,proxies=proxies,timeout=10)
         html = response.content
         try:
-            # print(html)
-            # html = html.decode('gb2312')
-            # print(html)
             if response.status_code == 200:
-                # print(response.text)
-                # if str("暂无全文") in str(html):
-                #     return "无下载地址"
-                # else:
                 try:
                     URL = "http://www.ccsn.org.cn/Zbbz/ShowFullText.aspx" + str(Guid)
-                    # print(URL)
                     response = requests.get(URL, headers=headers,proxies=proxies,timeout=10)
                     html = response.content
                     html = html.decode('GB2312')
-                    # print(html)
                     if str("暂无全文") in str(html):
                         return "无下载地址"
                     link_pattern = r'href="(.*?)"></a>'
