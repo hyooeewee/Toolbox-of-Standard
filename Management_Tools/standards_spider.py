@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding:utf-8 -*-
 # @FileName  :standards_spider.py
 # @Time      :2023/02/20 13:40:11
