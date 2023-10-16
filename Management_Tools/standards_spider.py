@@ -406,23 +406,19 @@ class DB_data_get():
     def Heilongjiang():
         pass
     
+class Multi_Update():
 
-def read_cell_data(sheet, i, j):
-    try:
-        value = sheet.iat[i, j]
-        if value != None:
-            return value, i, j
-        else:
-            return None
-    except:
-        pass
+    def read_data(fileName):
+        df = pd.read_excel(fileName, sheet_name="Sheet1")
+        data = dict(zip(df.iloc[:, 1], df.iloc[:, 2]))
+        return data
 
-def wash_data(data):
-    soup = BeautifulSoup(data, 'lxml')
-    print(type(soup))
-    # with open('soup.text', 'w+', encoding='utf-8') as fp:
-    #     fp.write(str(soup))
-    print(soup.find_all('.*?<font color="#000000">(.*?)</font>.*?'))
+    def wash_data(data):
+        soup = BeautifulSoup(data, 'lxml')
+        print(type(soup))
+        # with open('soup.text', 'w+', encoding='utf-8') as fp:
+        #     fp.write(str(soup))
+        print(soup.find_all('.*?<font color="#000000">(.*?)</font>.*?'))
 
 class format_data():
     def F_Hebei(input_str):
@@ -490,5 +486,7 @@ class format_data():
         return input_str
 
 if __name__ == "__main__":
-    print(DB_data_get.Tianjin())
+    # print(DB_data_get.Tianjin())
+    df = Multi_Update.read_data(r"D:\Users\weihao\OneDrive - hrbeu.edu.cn\05.Projects\02.Python\input.xlsx")
+    print(df)
 

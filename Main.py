@@ -17,8 +17,10 @@ import pymysql
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor, QIcon
-from PyQt5.QtWidgets import (QApplication, QFileDialog, QMainWindow, QMessageBox, QTableWidgetItem)
+from PyQt5.QtWidgets import (
+    QApplication, QFileDialog, QMainWindow, QMessageBox, QTableWidgetItem)
 from UI.res_rc import *
+from Management_Tools import standards_spider
 
 INI_PATH = r"config.ini"
 DATABASE_PATH = r'.\Database\users.db'
@@ -36,11 +38,13 @@ online_db_config = {
     'port': 3306  # MySQL默认端口号
 }
 
+
 class MyConfigParser(ConfigParser):
     '''重写类，取消大小写不敏感'''
 
     def optionxform(self, optionstr):
         return optionstr
+
 
 def load_setting():
     global UID, USER, PASSWORD, AUTO_LOGIN, REMEMBER_PASSWORD, PROVINCE_CODE
@@ -67,6 +71,7 @@ def dump_setting():
     with open(INI_PATH, 'w', encoding='utf-8') as f:
         cf.write(f)
 
+
 class LoginWindow(QMainWindow):  # 登录界面的相关函数
     global AUTO_LOGIN, REMEMBER_PASSWORD
 
@@ -81,16 +86,22 @@ class LoginWindow(QMainWindow):  # 登录界面的相关函数
         self.setWindowIcon(QIcon(r'Logo.ico'))  # 设置标题栏logo为Logo.ico
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
             "myappid")  # myappid是一个占位符，后边可以改成需要的AppUserModelID替换，这个ID是win系统中应用程序的唯一识别码，用于在任务栏中的分组
-        self.ui.pushButton_Login.clicked.connect(lambda: self.ui.stackedWidget_2.setCurrentIndex(0))  # 登录页切换
-        self.ui.pushButton_Register.clicked.connect(lambda: self.ui.stackedWidget_2.setCurrentIndex(1))  # 注册页切换
-        self.ui.pushButton_LSure.clicked.connect(self.local_login)  # 点击登录按钮，连接至login函数
-        self.ui.checkBox_RememberPassword.setChecked(REMEMBER_PASSWORD)  # 记住密码相关检测
+        self.ui.pushButton_Login.clicked.connect(
+            lambda: self.ui.stackedWidget_2.setCurrentIndex(0))  # 登录页切换
+        self.ui.pushButton_Register.clicked.connect(
+            lambda: self.ui.stackedWidget_2.setCurrentIndex(1))  # 注册页切换
+        self.ui.pushButton_LSure.clicked.connect(
+            self.local_login)  # 点击登录按钮，连接至login函数
+        self.ui.checkBox_RememberPassword.setChecked(
+            REMEMBER_PASSWORD)  # 记住密码相关检测
         if self.ui.checkBox_RememberPassword.isChecked():
             self.ui.lineEdit_LPassword.setText(PASSWORD)
             self.ui.checkBox_AutoLogin.setChecked(AUTO_LOGIN)
         self.ui.checkBox_AutoLogin.stateChanged.connect(self.auto_login)
-        self.ui.checkBox_RememberPassword.stateChanged.connect(self.remember_number)
-        self.ui.pushButton_Forgetpassword.clicked.connect(lambda: QMessageBox.warning(self, "提示", "功能研发中..."))
+        self.ui.checkBox_RememberPassword.stateChanged.connect(
+            self.remember_number)
+        self.ui.pushButton_Forgetpassword.clicked.connect(
+            lambda: QMessageBox.warning(self, "提示", "功能研发中..."))
         if USER:
             self.ui.lineEdit_LAccount.setText(USER)
         self.ui.pushButton_RSure.clicked.connect(self.register)
@@ -130,14 +141,15 @@ class LoginWindow(QMainWindow):  # 登录界面的相关函数
             REMEMBER_PASSWORD = 0
             self.ui.checkBox_AutoLogin.setChecked(AUTO_LOGIN)
 
-    def local_login(self):  #获取输入的账号和密码，与本地数据库进行比对，这个函数后期要改成在线验证，通过GET获取
+    def local_login(self):  # 获取输入的账号和密码，与本地数据库进行比对，这个函数后期要改成在线验证，通过GET获取
         global UID, USER, PASSWORD
         account = self.ui.lineEdit_LAccount.text()
         password = self.ui.lineEdit_LPassword.text()
         if account and password:
             conn = sqlite3.connect(DATABASE_PATH)
             cur = conn.cursor()
-            cur.execute(f'select uids, passwords from users where accounts="{account}"')
+            cur.execute(
+                f'select uids, passwords from users where accounts="{account}"')
             rows = cur.fetchall()
             conn.commit()
             conn.close()
@@ -159,11 +171,11 @@ class LoginWindow(QMainWindow):  # 登录界面的相关函数
             self.ui.stackedWidget.setCurrentIndex(1)
             self.ui.label_Wrong.setText('账号或密码不能为空！')
 
-    def forget_password(self):  #忘记密码
+    def forget_password(self):  # 忘记密码
         self.ui.stackedWidget.setCurrentIndex(1)
         self.ui.label_Wrong.setText('功能研发中！')
 
-    def register(self):     #注册账户，和本地数据库进行比对
+    def register(self):  # 注册账户，和本地数据库进行比对
         account = self.ui.lineEdit_RAccount.text()
         password1 = self.ui.lineEdit_RPassword1.text()
         password2 = self.ui.lineEdit_RPassword2.text()
@@ -171,7 +183,8 @@ class LoginWindow(QMainWindow):  # 登录界面的相关函数
             if password1 == password2:
                 conn = sqlite3.connect(DATABASE_PATH)
                 cur = conn.cursor()
-                cur.execute(f'select uids, passwords from users where accounts="{account}"')
+                cur.execute(
+                    f'select uids, passwords from users where accounts="{account}"')
                 rows = cur.fetchall()
                 if rows:
                     self.ui.stackedWidget.setCurrentIndex(1)
@@ -202,21 +215,30 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.ui = uic.loadUi(r'.\UI\Main.ui', self)  # 直接引用UI文件作为窗口
         self.ui.setWindowTitle('规范通V1.0')  # 命名标题
-        self.ui.setWindowIcon(QIcon(r'.\UI\icons\3914110.ico'))  # 设置logo
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("myappid")
-        self.ui.pushButton_Home.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
-        self.ui.pushButton_Check.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
-        self.ui.pushButton_CheckList.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
-        self.ui.pushButton_Generate.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
-        self.ui.pushButton_News.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(4))
-        self.ui.pushButton_My.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(5))
+        self.ui.setWindowIcon(QIcon(r'Logo.ico'))  # 设置logo
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+            "myappid")
+        self.ui.pushButton_Home.clicked.connect(
+            lambda: self.ui.stackedWidget.setCurrentIndex(0))
+        self.ui.pushButton_Check.clicked.connect(
+            lambda: self.ui.stackedWidget.setCurrentIndex(1))
+        self.ui.pushButton_CheckList.clicked.connect(
+            lambda: self.ui.stackedWidget.setCurrentIndex(2))
+        self.ui.pushButton_Generate.clicked.connect(
+            lambda: self.ui.stackedWidget.setCurrentIndex(3))
+        self.ui.pushButton_News.clicked.connect(
+            lambda: self.ui.stackedWidget.setCurrentIndex(4))
+        self.ui.pushButton_My.clicked.connect(
+            lambda: self.ui.stackedWidget.setCurrentIndex(5))
         # page 1
         self.ui.label_LocalDB_V.setText(
-            str(datetime.datetime.fromtimestamp(os.path.getmtime(os.getcwd() + "/Database/users.db"))).split('.')[0]
+            str(datetime.datetime.fromtimestamp(os.path.getmtime(
+                os.getcwd() + "/Database/users.db"))).split('.')[0]
         )
         self.ui.label_OnlineDB_V.setText(self.online_db_version())
         self.ui.label_UserName.setText(str(USER))
-        self.ui.pushButton_Export.clicked.connect(self.show_confirmation_dialog)
+        self.ui.pushButton_Export.clicked.connect(
+            self.show_confirmation_dialog)
         # page 2
         self.ui.comboBox_1.currentIndexChanged.connect(self.standard_CB1)
         self.ui.comboBox_2.hide()
@@ -272,7 +294,7 @@ class MainWindow(QMainWindow):
             pattarn = ''
         if pattarn:
             p1 = f"StandardNumbers REGEXP '^{pattarn}'"
-            if state != '不限':
+            if state != '不限' and pattarn == 'DB':
                 p1 += ' AND ' + f"TYPE REGEXP '^{state[:2]}'"
         if status != '不限':
             p2 = f"Status REGEXP '^{status}'"
@@ -325,20 +347,44 @@ class MainWindow(QMainWindow):
     def select_file1(self):
         # 调用QFileDialog.getOpenFileName方法，弹出文件选择窗口
         # 参数依次为：父窗口、标题、默认目录、文件类型过滤器、选项
-        fileName, _ = QFileDialog.getOpenFileName(self, '选择文件', os.getcwd(), '所有文件(*);;表格文件(*.xlxs, *.xls)')
+        self.fileName, _ = QFileDialog.getOpenFileName(
+            self, '选择文件', os.getcwd(), '所有文件(*);;表格文件(*.xlxs, *.xls)')
         # 如果用户选择了文件，打印文件名
-        if fileName:
-            self.ui.lineEdit_CLOpen1.setText(fileName)
+        if self.fileName:
+            self.ui.lineEdit_CLOpen1.setText(self.fileName)
 
     def select_file2(self):
         # 调用QFileDialog.getOpenFileName方法，弹出文件选择窗口
         # 参数依次为：父窗口、标题、默认目录、文件类型过滤器、选项
-        directory = QtWidgets.QFileDialog.getExistingDirectory(self, "选取文件夹", os.getcwd())
-        if directory:  # 如果用户选择了文件，打印文件名
-            self.ui.lineEdit_CLOpen2.setText(directory)
+        
+        self.directory = QtWidgets.QFileDialog.getExistingDirectory(
+            self, "选取文件夹", os.getcwd())
+        if self.directory:  # 如果用户选择了文件，打印文件名
+            self.ui.lineEdit_CLOpen2.setText(self.directory)
 
     def update(self):
-        QMessageBox.warning(self, "提示", "功能研发中...")
+        sm = standards_spider.Multi_Update
+        # QMessageBox.warning(self, "提示", "功能研发中...")
+        # 读取数据
+        self.fileName = r"D:/Users/weihao/OneDrive - hrbeu.edu.cn/05.Projects/02.Python/input.xlsx"
+        data = sm.read_data(self.fileName)
+        self.ui.progressBar.setMaximum(len(data)) if data else QMessageBox.warning(self, "提示", "数据读取失败")
+        # 查询数据
+        for i, item in enumerate(data):
+            self.ui.progressBar.setValue(int(i+1))
+            # 数据库查询
+            print(i, item) 
+            conn = sqlite3.connect(DATABASE_PATH)
+            cur = conn.cursor()
+            try:
+                cur.execute(f"SELECT * FROM standards WHERE StandardNames is {item}")
+                print(cur.fetchall())
+            except:
+                pass
+            if i >10 : break
+
+        # 写入数据
+        pass
 
     def change_password(self):
         global UID
@@ -354,7 +400,8 @@ class MainWindow(QMainWindow):
                     self.ui.stackedWidget_2.setCurrentIndex(1)
                     self.ui.label_MWrong.setText('新密码不能与原密码相同！')
                 else:
-                    cur.execute(f'update users set passwords="{password1}" where uids={UID}')
+                    cur.execute(
+                        f'update users set passwords="{password1}" where uids={UID}')
                     self.ui.stackedWidget_2.setCurrentIndex(0)
                     self.ui.label_MTips.setText('修改成功！')
                 conn.commit()
@@ -416,7 +463,8 @@ class MainWindow(QMainWindow):
             # 关闭数据库连接
             connection.close()
         for i in range(len(result_list)):  # 提取全部的时间，转换成datetime对象
-            time_list.append(datetime.datetime.strptime(result_list[i][8], "%Y-%m-%d %H:%M:%S.%f"))
+            time_list.append(datetime.datetime.strptime(
+                result_list[i][8], "%Y-%m-%d %H:%M:%S.%f"))
         result = max(time_list)
         return str(result).split('.')[0]
 
@@ -441,7 +489,8 @@ class MainWindow(QMainWindow):
             row_data = []
             column_count = self.tableWidget.columnCount()  # 获取列数
             for column in range(column_count):
-                item = self.tableWidget.item(selected_row, column)  # 获取选中行的每个单元格的 QTableWidgetItem 对象
+                # 获取选中行的每个单元格的 QTableWidgetItem 对象
+                item = self.tableWidget.item(selected_row, column)
                 if item is not None:
                     row_data.append(item.text())  # 获取单元格中的文本数据
             # 现在，row_data 列表包含了选中行的数据
@@ -458,7 +507,8 @@ class MainWindow(QMainWindow):
                 options |= QFileDialog.ReadOnly  # 使对话框只读
                 # 获取用户选择的路径
                 desktop_dir = os.path.expanduser("~/Desktop")
-                selected_path = QFileDialog.getExistingDirectory(self, '选择路径', options=options, directory=desktop_dir)
+                selected_path = QFileDialog.getExistingDirectory(
+                    self, '选择路径', options=options, directory=desktop_dir)
                 if selected_path:
                     print(f'选择的路径为: {selected_path}')
                     file_address = selected_path + "/" + name + ".pdf"
@@ -490,14 +540,18 @@ class MainWindow(QMainWindow):
             desktop_path = None
         return desktop_path
 
+
 def save_setting():
     print('save setting')
     pass
+
 
 def load_json():
     pass
 
 # 资源文件目录访问
+
+
 def source_path(relative_path):
     # 是否Bundle Resource
     if getattr(sys, 'frozen', False):
@@ -505,6 +559,7 @@ def source_path(relative_path):
     else:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
+
 
 if __name__ == "__main__":
     # 修改当前工作目录，使得资源文件可以被正确访问，打包需要
