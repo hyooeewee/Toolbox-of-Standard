@@ -20,6 +20,8 @@ from PyQt5.QtGui import QCursor, QIcon
 from PyQt5.QtWidgets import (
     QApplication, QFileDialog, QMainWindow, QMessageBox, QTableWidgetItem)
 from UI.res_rc import *
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtCore import QUrl
 from Management_Tools import standards_spider
 
 INI_PATH = r"config.ini"
@@ -356,7 +358,7 @@ class MainWindow(QMainWindow):
     def select_file2(self):
         # 调用QFileDialog.getOpenFileName方法，弹出文件选择窗口
         # 参数依次为：父窗口、标题、默认目录、文件类型过滤器、选项
-        
+
         self.directory = QtWidgets.QFileDialog.getExistingDirectory(
             self, "选取文件夹", os.getcwd())
         if self.directory:  # 如果用户选择了文件，打印文件名
@@ -373,7 +375,7 @@ class MainWindow(QMainWindow):
         for i, item in enumerate(data):
             self.ui.progressBar.setValue(int(i+1))
             # 数据库查询
-            print(i, item) 
+            print(i, item)
             conn = sqlite3.connect(DATABASE_PATH)
             cur = conn.cursor()
             try:

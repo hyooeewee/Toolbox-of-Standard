@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>676</width>
-    <height>663</height>
+    <height>755</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,7 +22,7 @@
      <x>30</x>
      <y>30</y>
      <width>616</width>
-     <height>607</height>
+     <height>713</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -37,9 +37,6 @@
       </item>
       <item row="1" column="0">
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="OLDB_ACCOUNT"/>
-        </item>
         <item row="1" column="1">
          <widget class="QLineEdit" name="OLDB_PORT"/>
         </item>
@@ -67,13 +64,6 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>账号：</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1">
          <widget class="QLineEdit" name="OLDB_IP"/>
         </item>
@@ -94,6 +84,16 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="OLDB_ACCOUNT"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>账号：</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -324,7 +324,7 @@
          </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QCheckBox" name="HENAN">
+         <widget class="QCheckBox" name="S_HENAN">
           <property name="text">
            <string>河南地标</string>
           </property>
@@ -340,6 +340,13 @@
        </layout>
       </item>
       <item>
+       <widget class="QPushButton" name="S_Spider">
+        <property name="text">
+         <string>开始爬取</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QTextBrowser" name="S_MB"/>
       </item>
       <item>
@@ -352,7 +359,56 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QTableView" name="OL_TableView"/>
+         <widget class="QTableWidget" name="tableWidget">
+          <attribute name="horizontalHeaderCascadingSectionResizes">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderCascadingSectionResizes">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>标准编号</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>标准名称</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>实施日期</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>作废日期</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>执行状态</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>下载链接</string>
+           </property>
+          </column>
+         </widget>
         </item>
         <item row="2" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout_2">

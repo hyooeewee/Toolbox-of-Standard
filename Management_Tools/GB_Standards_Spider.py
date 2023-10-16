@@ -51,6 +51,31 @@ class URL_Requests : #随机的请求头，后边也可以改成字段随机组�
         }
         return proxies
 def GB_get_all():
+    def GuoBiao_get_PDF(GB_URL, Guid, IP_List):
+        try:
+            headers = URL_Requests.Random_headers()
+            proxies = URL_Requests.Random_IP(IP_List)
+            response = requests.get(GB_URL, headers=headers, proxies=proxies, timeout=10)
+            html = response.content
+            try:
+                if response.status_code == 200:
+                    try:
+                        URL = "http://www.ccsn.org.cn/Zbbz/ShowFullText.aspx" + str(Guid)
+                        response = requests.get(URL, headers=headers, proxies=proxies, timeout=10)
+                        html = response.content
+                        html = html.decode('GB2312')
+                        if str("暂无全文") in str(html):
+                            return "无下载地址"
+                        link_pattern = r'href="(.*?)"></a>'
+                        link_matches = re.findall(link_pattern, html, re.S)
+                        return str(link_matches[0])
+                    except RequestException:
+                        return "无下载地址"
+            except:
+                return "无下载地址"
+            return "无下载地址"
+        except RequestException:
+            return "无下载地址"
     Proxies_IP_List = IP_Pool()
     total_list = []
     chrome_options = Options()
@@ -106,28 +131,4 @@ def GB_get_all():
     driver.quit()
     return total_list
 
-def GuoBiao_get_PDF(GB_URL,Guid,IP_List):
-    try:
-        headers = URL_Requests.Random_headers()
-        proxies = URL_Requests.Random_IP(IP_List)
-        response = requests.get(GB_URL, headers=headers,proxies=proxies,timeout=10)
-        html = response.content
-        try:
-            if response.status_code == 200:
-                try:
-                    URL = "http://www.ccsn.org.cn/Zbbz/ShowFullText.aspx" + str(Guid)
-                    response = requests.get(URL, headers=headers,proxies=proxies,timeout=10)
-                    html = response.content
-                    html = html.decode('GB2312')
-                    if str("暂无全文") in str(html):
-                        return "无下载地址"
-                    link_pattern = r'href="(.*?)"></a>'
-                    link_matches = re.findall(link_pattern, html, re.S)
-                    return str(link_matches[0])
-                except RequestException:
-                    return "无下载地址"
-        except:
-            return "无下载地址"
-        return "无下载地址"
-    except RequestException:
-        return "无下载地址"
+
