@@ -1,12 +1,15 @@
 # dir 不需要提交的目录
-/__pycache__
-/.idea
+/__pycache__/
+/.idea/
 /.vscode
 /logs
-/Management_Tools
+/Management_Tools/
 /test
 
 # file 不需要提交的文件
-# .gitignore
+.gitignore
 *.xmind
 *.pyc
+
+# 不忽略文件
+# !.gitignore
