@@ -24,8 +24,8 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QUrl
 from Management_Tools import standards_spider
 
-INI_PATH = r"config.ini"
-DATABASE_PATH = r'.\Database\users.db'
+INI_PATH = r".\resources\config.ini"
+DATABASE_PATH = r'.\database\users.db'
 UID = ''
 USER = ''
 PASSWORD = ''
@@ -39,40 +39,6 @@ online_db_config = {
     'database': 'standard_db',  # 要连接的数据库名称
     'port': 3306  # MySQL默认端口号
 }
-
-
-class MyConfigParser(ConfigParser):
-    '''重写类，取消大小写不敏感'''
-
-    def optionxform(self, optionstr):
-        return optionstr
-
-
-def load_setting():
-    global UID, USER, PASSWORD, AUTO_LOGIN, REMEMBER_PASSWORD, PROVINCE_CODE
-    cf = MyConfigParser()
-    cf.read(INI_PATH, encoding='utf-8')
-    LOGIN_SETTINGS = cf.items('LOGIN_SETTINGS')
-    UID = LOGIN_SETTINGS[0][1]
-    USER = LOGIN_SETTINGS[1][1]
-    PASSWORD = LOGIN_SETTINGS[2][1]
-    AUTO_LOGIN = int(LOGIN_SETTINGS[3][1])
-    REMEMBER_PASSWORD = int(LOGIN_SETTINGS[4][1])
-    PROVINCE_CODE = cf.items('PROVINCE_CODE')
-
-
-def dump_setting():
-    global UID, USER, PASSWORD, AUTO_LOGIN, REMEMBER_PASSWORD
-    cf = MyConfigParser(comment_prefixes='；', allow_no_value=True)
-    cf.read(INI_PATH, encoding='utf-8')
-    cf['LOGIN_SETTINGS']['UID'] = str(UID)
-    cf['LOGIN_SETTINGS']['USER'] = str(USER)
-    cf['LOGIN_SETTINGS']['PASSWORD'] = str(PASSWORD)
-    cf['LOGIN_SETTINGS']['AUTO_LOGIN'] = str(AUTO_LOGIN)
-    cf['LOGIN_SETTINGS']['REMEMBER_PASSWORD'] = str(REMEMBER_PASSWORD)
-    with open(INI_PATH, 'w', encoding='utf-8') as f:
-        cf.write(f)
-
 
 class LoginWindow(QMainWindow):  # 登录界面的相关函数
     global AUTO_LOGIN, REMEMBER_PASSWORD

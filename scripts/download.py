@@ -7,9 +7,11 @@
 import os
 
 class DB_update():
+    '''本地数据库更新的类'''
     pass
 
 class File_download():
+    '''文件下载的函数类'''
     def get_desktop_path():  # 获取桌面的路径，作为默认存储路径
         home_path = os.path.expanduser("~")
         if os.name == "posix":  # macOS or Linux
@@ -21,6 +23,7 @@ class File_download():
         return desktop_path
 
 class News_update():
+    '''新闻的函数类'''
     pass
 
 if __name__ == "__main__":
