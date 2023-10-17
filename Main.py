@@ -370,18 +370,26 @@ class MainWindow(QMainWindow):
         data = sm.read_data(self.fileName)
         self.ui.progressBar.setMaximum(len(data)) if data else QMessageBox.warning(self, "提示", "数据读取失败")
         # 查询数据
-        for i, item in enumerate(data):
+        conn = sqlite3.connect(DATABASE_PATH)
+        cur = conn.cursor()
+        for i,item in enumerate(data):
             self.ui.progressBar.setValue(int(i+1))
             # 数据库查询
             print(i, item) 
-            conn = sqlite3.connect(DATABASE_PATH)
-            cur = conn.cursor()
             try:
-                cur.execute(f"SELECT * FROM standards WHERE StandardNames is {item}")
-                print(cur.fetchall())
+                # 如果有返回值就对比最新的数据的标准号（！！！可能存在标准号不变，版本号变了的，后面研究怎么办）
+                cur.execute(f'SELECT * FROM standards WHERE StandardNames is "{item}"')
+                res = cur.fetchall()
+                if res:
+                    if data[item] == sorted(res, key=lambda i:i[2])[-1][0]:
+                        # 无更新
+                        pass
+
+                # print(cur.fetchall())
             except:
                 pass
-            if i >10 : break
+            if i >8 : break
+        conn.close()
 
         # 写入数据
         pass

@@ -489,4 +489,3 @@ if __name__ == "__main__":
     # print(DB_data_get.Tianjin())
     df = Multi_Update.read_data(r"D:\Users\weihao\OneDrive - hrbeu.edu.cn\05.Projects\02.Python\input.xlsx")
     print(df)
-
