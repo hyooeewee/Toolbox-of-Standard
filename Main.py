@@ -3,6 +3,7 @@
 # @FileName  :main.py
 # @Time      :2023/09/28 10:40:35
 # @Author    :hyooeewee,Mason_Lee
+
 import ctypes
 import re
 import sqlite3
@@ -12,19 +13,21 @@ import os
 import datetime
 import urllib
 import urllib.request
-from configparser import ConfigParser
+
 import pymysql
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QCursor, QIcon
+from PyQt5.QtCore import Qt, QUrl, QThread, pyqtSignal, QDateTime
+from PyQt5.QtGui import QCursor, QIcon, QColor
 from PyQt5.QtWidgets import (
-    QApplication, QFileDialog, QMainWindow, QMessageBox, QTableWidgetItem)
+    QApplication, QFileDialog, QMainWindow, QMessageBox, QTableWidgetItem, QGraphicsDropShadowEffect)
 from UI.res_rc import *
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import QUrl
-from Management_Tools import standards_spider
+from scripts.download import *
+from scripts.logic import *
+from scripts.upload import *
 
 INI_PATH = r".\resources\config.ini"
+ICON_PATH = r".\resources\Logo.ico"
 DATABASE_PATH = r'.\database\users.db'
 UID = ''
 USER = ''
@@ -40,34 +43,71 @@ online_db_config = {
     'port': 3306  # MySQL默认端口号
 }
 
-class LoginWindow(QMainWindow):  # 登录界面的相关函数
-    global AUTO_LOGIN, REMEMBER_PASSWORD
+class MyThread(QThread):
+    status_signal = pyqtSignal(int)
+    def run(self):
+        connection = pymysql.connect(**online_db_config)
+        try:
+            # 创建一个数据库游标对象
+            with connection.cursor() as cursor:
+                # 执行 SQL 查询
+                sql_query = "SELECT * FROM STANDARD"
+                cursor.execute(sql_query)
+                # 获取所有行的结果
+                rows = cursor.fetchall()
+                # 将结果转换为列表
+                result_list = list(rows)
+        finally:
+            # 关闭数据库连接
+            connection.close()
+        if result_list:
+            conn = sqlite3.connect(DATABASE_PATH)
+            cur = conn.cursor()
+            for i in result_list:
+                try:
+                    cur.execute(
+                        f"insert into standards values('{i[0]}','{i[2]}','{i[3]}','{i[4]}','{i[5]}',"
+                        f"'{i[6]}','{i[7]}','{i[1]}','{i[8]}')")
+                except:
+                    try:
+                        cur.execute(
+                            f"update standards set StandardNames='{i[2]}',StartDate='{i[3]}', EndDate='{i[4]}',"
+                            f"Status='{i[5]}',DownloadLinks='{i[6]}',TYPE='{i[1]}',HEADERS='{i[7]}',UPDATE_TIME='{i[8]}'"
+                            f" where StandardNumbers='{i[0]}'")
+                    except:
+                        pass
+            conn.commit()
+            conn.close()
+        self.status_signal.emit(len(result_list))
 
+class LoginWindow(QMainWindow):
+    '''登录界面'''
     def __init__(self):
         super().__init__()
-        # self.m_Position = event.globalPos() - self.pos()  # 获取鼠标相对窗口的位置
         self.m_flag = False
         self.ui = uic.loadUi(r'.\UI\Login.ui', self)  # 直接将UI文件导入作为显示界面
         self.setWindowFlag(Qt.FramelessWindowHint)  # 去掉外边框
-        self.setAttribute(Qt.WA_TranslucentBackground)  # 设置背景透明和图标
-        self.label.setStyleSheet('background-color: white;')  # 设置标签
-        self.setWindowIcon(QIcon(r'Logo.ico'))  # 设置标题栏logo为Logo.ico
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-            "myappid")  # myappid是一个占位符，后边可以改成需要的AppUserModelID替换，这个ID是win系统中应用程序的唯一识别码，用于在任务栏中的分组
+        self.setAutoFillBackground(True) #一定要加上
+        self.setAttribute(Qt.WA_TranslucentBackground)  # 窗口透明
+        shadow = QGraphicsDropShadowEffect()  # 创建阴影
+        shadow.setBlurRadius(5)  # 设置阴影大小为5px
+        shadow.setColor(QColor("#444444"))  # 设置颜色透明度为100的（0,0,0）黑色
+        shadow.setOffset(0,0)  # 阴影偏移距离为0px
+        self.setGraphicsEffect(shadow)  # 添加阴影
+        self.setWindowIcon(QIcon(ICON_PATH))  # 设置标题栏logo为Logo.ico
+        # myappid是一个占位符，后边可以改成需要的AppUserModelID替换，这个ID是win系统中应用程序的唯一识别码，用于在任务栏中的分组
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("myappid")  
         self.ui.pushButton_Login.clicked.connect(
             lambda: self.ui.stackedWidget_2.setCurrentIndex(0))  # 登录页切换
         self.ui.pushButton_Register.clicked.connect(
             lambda: self.ui.stackedWidget_2.setCurrentIndex(1))  # 注册页切换
-        self.ui.pushButton_LSure.clicked.connect(
-            self.local_login)  # 点击登录按钮，连接至login函数
-        self.ui.checkBox_RememberPassword.setChecked(
-            REMEMBER_PASSWORD)  # 记住密码相关检测
+        self.ui.pushButton_LSure.clicked.connect(self.local_login)  # 点击登录按钮，连接至login函数
+        self.ui.checkBox_RememberPassword.setChecked(REMEMBER_PASSWORD)
         if self.ui.checkBox_RememberPassword.isChecked():
             self.ui.lineEdit_LPassword.setText(PASSWORD)
             self.ui.checkBox_AutoLogin.setChecked(AUTO_LOGIN)
         self.ui.checkBox_AutoLogin.stateChanged.connect(self.auto_login)
-        self.ui.checkBox_RememberPassword.stateChanged.connect(
-            self.remember_number)
+        self.ui.checkBox_RememberPassword.stateChanged.connect(self.remember_number)
         self.ui.pushButton_Forgetpassword.clicked.connect(
             lambda: QMessageBox.warning(self, "提示", "功能研发中..."))
         if USER:
@@ -77,18 +117,19 @@ class LoginWindow(QMainWindow):  # 登录界面的相关函数
         if self.ui.checkBox_AutoLogin.isChecked():
             self.local_login()
 
-    def mousePressEvent(self, event):  # 拖动窗口时，述标变成小手，这个函数为检测点击的位置
+    def mousePressEvent(self, event):  # 检测点击的位置
+        self.m_Position = event.globalPos() - self.pos()  # 获取鼠标相对窗口的位置
         if event.button() == Qt.LeftButton:
             self.m_flag = True
             event.accept()
-            self.setCursor(QCursor(Qt.OpenHandCursor))  # 更改鼠标图标
 
-    def mouseMoveEvent(self, QMouseEvent):  # 拖动窗口时，述标变成小手，这个函数为拖动的函数
+    def mouseMoveEvent(self, QMouseEvent):  # 拖动的函数
         if Qt.LeftButton and self.m_flag:
+            self.setCursor(QCursor(Qt.OpenHandCursor))  # 更改鼠标图标
             self.move(QMouseEvent.globalPos() - self.m_Position)  # 更改窗口位置
             QMouseEvent.accept()
 
-    def mouseReleaseEvent(self, QMouseEvent):  # 拖动窗口时，述标变成小手，这个函数为释放的函数
+    def mouseReleaseEvent(self, QMouseEvent):  # 释放的函数
         self.setCursor(QCursor(Qt.ArrowCursor))
 
     def auto_login(self):  # 自动登录相关函数
@@ -99,6 +140,8 @@ class LoginWindow(QMainWindow):  # 登录界面的相关函数
             self.ui.checkBox_RememberPassword.setChecked(REMEMBER_PASSWORD)
         else:
             AUTO_LOGIN = 0
+        if not REMEMBER_PASSWORD:
+            UID = USER = PASSWORD = ''
 
     def remember_number(self):  # 记住账号密码检测函数
         global AUTO_LOGIN, REMEMBER_PASSWORD
@@ -119,7 +162,6 @@ class LoginWindow(QMainWindow):  # 登录界面的相关函数
             cur.execute(
                 f'select uids, passwords from users where accounts="{account}"')
             rows = cur.fetchall()
-            conn.commit()
             conn.close()
             if rows:
                 for row in rows:
@@ -127,21 +169,17 @@ class LoginWindow(QMainWindow):  # 登录界面的相关函数
                         UID = row[0]
                         USER = account
                         PASSWORD = password
-                        dump_setting()
-                        self.ui.stackedWidget.setCurrentIndex(0)
-                        self.ui.label_Tips.setText('登录成功！')
+                        Setting.dump_setting(UID, USER, PASSWORD, AUTO_LOGIN, REMEMBER_PASSWORD)
+                        MyMessageBox(QIcon(ICON_PATH), '提示', '登录成功！！！', 2000)
                         self.close()
                         MainWindow()
-            else:
-                self.ui.stackedWidget.setCurrentIndex(1)
-                self.ui.label_Wrong.setText('账号或者密码错误！')
+                    else:
+                        MyMessageBox(QIcon(ICON_PATH), '提示', '账号或者密码错误！', 1000)
         else:
-            self.ui.stackedWidget.setCurrentIndex(1)
-            self.ui.label_Wrong.setText('账号或密码不能为空！')
+            MyMessageBox(QIcon(ICON_PATH), '提示', '账号或密码不能为空！', 1000)
 
     def forget_password(self):  # 忘记密码
-        self.ui.stackedWidget.setCurrentIndex(1)
-        self.ui.label_Wrong.setText('功能研发中！')
+        pass
 
     def register(self):  # 注册账户，和本地数据库进行比对
         account = self.ui.lineEdit_RAccount.text()
@@ -155,8 +193,7 @@ class LoginWindow(QMainWindow):  # 登录界面的相关函数
                     f'select uids, passwords from users where accounts="{account}"')
                 rows = cur.fetchall()
                 if rows:
-                    self.ui.stackedWidget.setCurrentIndex(1)
-                    self.ui.label_Wrong.setText('账户已存在！')
+                    MyMessageBox(QIcon(ICON_PATH), '提示', '账户已存在！', 1000)
                     self.ui.lineEdit_RAccount.setText()
                     self.ui.lineEdit_RPassword1.setText()
                     self.ui.lineEdit_RPassword2.setText()
@@ -165,27 +202,24 @@ class LoginWindow(QMainWindow):  # 登录界面的相关函数
                         'insert into users values({:.0f}, \'{}\', \'{}\')'.format(time.time(), account, password1))
                     conn.commit()
                 conn.close()
-                self.ui.stackedWidget.setCurrentIndex(0)
-                self.ui.label_Tips.setText('注册成功！')
-                time.sleep(1)
+                MyMessageBox(QIcon(ICON_PATH), '提示', '注册成功！', 1000)
                 self.ui.stackedWidget_2.setCurrentIndex(0)
             else:
-                self.ui.stackedWidget.setCurrentIndex(1)
-                self.ui.label_Wrong.setText('两次输入密码不一致！')
+                MyMessageBox(QIcon(ICON_PATH), '提示', '两次输入密码不一致！', 1000)
         else:
-            self.ui.stackedWidget.setCurrentIndex(1)
-            self.ui.label_Wrong.setText('请填写完整！')
-
+            MyMessageBox(QIcon(ICON_PATH), '提示', '请填写完整！', 1000)
 
 class MainWindow(QMainWindow):
+    '''主界面'''
     def __init__(self):
         global PROVINCE_CODE
         super().__init__()
         self.ui = uic.loadUi(r'.\UI\Main.ui', self)  # 直接引用UI文件作为窗口
         self.ui.setWindowTitle('规范通V1.0')  # 命名标题
-        self.ui.setWindowIcon(QIcon(r'Logo.ico'))  # 设置logo
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-            "myappid")
+        self.ui.setWindowIcon(QIcon(ICON_PATH))  # 设置logo
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("myappid")
+        if self.ui.pushButton_Home.isChecked():
+            self.ui.stackedWidget.setCurrentIndex(0)
         self.ui.pushButton_Home.clicked.connect(
             lambda: self.ui.stackedWidget.setCurrentIndex(0))
         self.ui.pushButton_Check.clicked.connect(
@@ -336,31 +370,31 @@ class MainWindow(QMainWindow):
         # 读取数据
         self.fileName = r"D:/Users/weihao/OneDrive - hrbeu.edu.cn/05.Projects/02.Python/input.xlsx"
         data = sm.read_data(self.fileName)
-        self.ui.progressBar.setMaximum(len(data)) if data else QMessageBox.warning(self, "提示", "数据读取失败")
+        self.ui.progressBar.setMaximum(
+            len(data)) if data else QMessageBox.warning(self, "提示", "数据读取失败")
         # 查询数据
         conn = sqlite3.connect(DATABASE_PATH)
         cur = conn.cursor()
-        for i,item in enumerate(data):
+        for i, item in enumerate(data):
             self.ui.progressBar.setValue(int(i+1))
             # 数据库查询
-            print(i, item) 
+            print(i, item)
             try:
                 # 如果有返回值就对比最新的数据的标准号（！！！可能存在标准号不变，版本号变了的，后面研究怎么办）
-                cur.execute(f'SELECT * FROM standards WHERE StandardNames is "{item}"')
+                cur.execute(
+                    f'SELECT * FROM standards WHERE StandardNames is "{item}"')
                 res = cur.fetchall()
                 if res:
-                    if data[item] == sorted(res, key=lambda i:i[2])[-1][0]:
+                    if data[item] == sorted(res, key=lambda i: i[2])[-1][0]:
                         # 无更新
                         pass
 
                 # print(cur.fetchall())
             except:
                 pass
-            if i >8 : break
+            if i > 8:
+                break
         conn.close()
-
-        # 写入数据
-        pass
 
     def change_password(self):
         global UID
@@ -373,54 +407,27 @@ class MainWindow(QMainWindow):
                 cur.execute(f'select passwords from users where uids="{UID}"')
                 rows = cur.fetchall()
                 if rows[0] == password1:
-                    self.ui.stackedWidget_2.setCurrentIndex(1)
-                    self.ui.label_MWrong.setText('新密码不能与原密码相同！')
+                    MyMessageBox(QIcon(ICON_PATH), '提示', '新密码不能与原密码相同！', 1000)
                 else:
                     cur.execute(
                         f'update users set passwords="{password1}" where uids={UID}')
-                    self.ui.stackedWidget_2.setCurrentIndex(0)
-                    self.ui.label_MTips.setText('修改成功！')
+                    MyMessageBox(QIcon(ICON_PATH), '提示', '修改成功！', 1000)
                 conn.commit()
                 conn.close()
             else:
-                self.ui.stackedWidget_2.setCurrentIndex(1)
-                self.ui.label_MWrong.setText('输入不一致！')
+                MyMessageBox(QIcon(ICON_PATH), '提示', '输入不一致！', 1000)
         else:
-            self.ui.stackedWidget_2.setCurrentIndex(1)
-            self.ui.label_MWrong.setText('输入不完整！')
+            MyMessageBox(QIcon(ICON_PATH), '提示', '请填写完整！', 1000)
 
     def export(self):  # 从服务器端更新本地数据库
-        connection = pymysql.connect(**online_db_config)
-        try:
-            # 创建一个数据库游标对象
-            with connection.cursor() as cursor:
-                # 执行 SQL 查询
-                sql_query = "SELECT * FROM STANDARD"
-                cursor.execute(sql_query)
-                # 获取所有行的结果
-                rows = cursor.fetchall()
-                # 将结果转换为列表
-                result_list = list(rows)
-        finally:
-            # 关闭数据库连接
-            connection.close()
-        if result_list:
-            conn = sqlite3.connect(DATABASE_PATH)
-            cur = conn.cursor()
-            for i in result_list:
-                try:
-                    cur.execute(
-                        f"insert into standards values('{i[0]}','{i[2]}','{i[3]}','{i[4]}','{i[5]}',"
-                        f"'{i[6]}','{i[7]}','{i[1]}','{i[8]}')")
-                except:
-                    cur.execute(
-                        f"update standards set StandardNames='{i[2]}',StartDate='{i[3]}', EndDate='{i[4]}',"
-                        f"Status='{i[5]}',DownloadLinks='{i[6]}',TYPE='{i[1]}',HEADERS='{i[7]}',UPDATE_TIME='{i[8]}'"
-                        f" where StandardNumbers='{i[0]}'")
-            conn.commit()
-            conn.close()
-            self.ui.label_LocalDB_V.setText(str(datetime.datetime.fromtimestamp(
-                os.path.getmtime(os.getcwd() + "/Database/users.db"))).split(".")[0])  # 数据库写入完成后，更新本地数据库时间
+        self.update_DB = MyThread()
+        self.update_DB.status_signal.connect(self.update_db) #利用槽接收子进程更新
+        self.update_DB.start() #开始子进程
+
+    def update_db(self, data):
+        print(f'累计更新{data}条数据。')
+        self.ui.label_LocalDB_V.setText(str(datetime.datetime.fromtimestamp(
+            os.path.getmtime(os.getcwd() + "/Database/users.db"))).split(".")[0])  # 数据库写入完成后，更新本地数据库时间
 
     def online_db_version(self):
         time_list = []
@@ -447,8 +454,9 @@ class MainWindow(QMainWindow):
     def show_confirmation_dialog(self):
         # 创建一个确认对话框
         confirmation = QMessageBox()
+        confirmation.setWindowIcon(QIcon(ICON_PATH))
         confirmation.setWindowTitle("数据库更新确认")
-        confirmation.setText("更新数据库时间可能较长，过程中本程序无法使用，是否需要更新")
+        confirmation.setText("数据库将在后台更新~")
         confirmation.setIcon(QMessageBox.Question)
         confirmation.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         # 显示对话框并获取用户的选择
@@ -516,18 +524,6 @@ class MainWindow(QMainWindow):
             desktop_path = None
         return desktop_path
 
-
-def save_setting():
-    print('save setting')
-    pass
-
-
-def load_json():
-    pass
-
-# 资源文件目录访问
-
-
 def source_path(relative_path):
     # 是否Bundle Resource
     if getattr(sys, 'frozen', False):
@@ -536,13 +532,12 @@ def source_path(relative_path):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
-
 if __name__ == "__main__":
     # 修改当前工作目录，使得资源文件可以被正确访问，打包需要
     cd = source_path('')
     os.chdir(cd)
-    load_setting()
-    load_json()
+    UID, USER, PASSWORD, AUTO_LOGIN, REMEMBER_PASSWORD, PROVINCE_CODE= Setting.load_setting()
+    # Setting.load_json()
     app = QApplication(sys.argv)
     win = LoginWindow()
     sys.exit(app.exec_())
