@@ -16,7 +16,7 @@ import urllib.request
 
 import pymysql
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtCore import Qt, QUrl, QThread, pyqtSignal, QDateTime
+from PyQt5.QtCore import Qt, QUrl, QThread, pyqtSignal
 from PyQt5.QtGui import QCursor, QIcon, QColor
 from PyQt5.QtWidgets import (
     QApplication, QFileDialog, QMainWindow, QMessageBox, QTableWidgetItem, QGraphicsDropShadowEffect)
@@ -90,13 +90,14 @@ class LoginWindow(QMainWindow):
         self.setAutoFillBackground(True) #一定要加上
         self.setAttribute(Qt.WA_TranslucentBackground)  # 窗口透明
         shadow = QGraphicsDropShadowEffect()  # 创建阴影
-        shadow.setBlurRadius(5)  # 设置阴影大小为5px
+        shadow.setBlurRadius(5)  # 阴影模糊半径
         shadow.setColor(QColor("#444444"))  # 设置颜色透明度为100的（0,0,0）黑色
-        shadow.setOffset(0,0)  # 阴影偏移距离为0px
+        shadow.setOffset(0,5)  # 阴影的偏移值
         self.setGraphicsEffect(shadow)  # 添加阴影
         self.setWindowIcon(QIcon(ICON_PATH))  # 设置标题栏logo为Logo.ico
         # myappid是一个占位符，后边可以改成需要的AppUserModelID替换，这个ID是win系统中应用程序的唯一识别码，用于在任务栏中的分组
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("myappid")  
+
         self.ui.pushButton_Login.clicked.connect(
             lambda: self.ui.stackedWidget_2.setCurrentIndex(0))  # 登录页切换
         self.ui.pushButton_Register.clicked.connect(
@@ -214,10 +215,19 @@ class MainWindow(QMainWindow):
     def __init__(self):
         global PROVINCE_CODE
         super().__init__()
+        self.m_flag = False
         self.ui = uic.loadUi(r'.\UI\Main.ui', self)  # 直接引用UI文件作为窗口
-        self.ui.setWindowTitle('规范通V1.0')  # 命名标题
-        self.ui.setWindowIcon(QIcon(ICON_PATH))  # 设置logo
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("myappid")
+        self.setWindowFlag(Qt.FramelessWindowHint)  # 去掉外边框
+        self.setAutoFillBackground(True) #一定要加上
+        self.setAttribute(Qt.WA_TranslucentBackground)  # 窗口透明
+        shadow = QGraphicsDropShadowEffect()  # 创建阴影
+        shadow.setBlurRadius(5)  # 设置阴影大小为5px
+        shadow.setColor(QColor("#444444"))  # 设置颜色透明度为100的（0,0,0）黑色
+        shadow.setOffset(2,2)  # 阴影偏移距离为0px
+        self.setGraphicsEffect(shadow)  # 添加阴影
+        self.setWindowIcon(QIcon(ICON_PATH))  # 设置标题栏logo为Logo.ico
+        # myappid是一个占位符，后边可以改成需要的AppUserModelID替换，这个ID是win系统中应用程序的唯一识别码，用于在任务栏中的分组
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("myappid")  
         if self.ui.pushButton_Home.isChecked():
             self.ui.stackedWidget.setCurrentIndex(0)
         self.ui.pushButton_Home.clicked.connect(
@@ -232,6 +242,10 @@ class MainWindow(QMainWindow):
             lambda: self.ui.stackedWidget.setCurrentIndex(4))
         self.ui.pushButton_My.clicked.connect(
             lambda: self.ui.stackedWidget.setCurrentIndex(5))
+        # page init
+        self.ui.pushButton_back.hide()
+        self.ui.pushButton_max.clicked.connect(lambda:(self.ui.pushButton_back.show(),self.ui.pushButton_max.hide()))
+        self.ui.pushButton_back.clicked.connect(lambda:(self.ui.pushButton_back.hide(),self.ui.pushButton_max.show()))
         # page 1
         self.ui.label_LocalDB_V.setText(
             str(datetime.datetime.fromtimestamp(os.path.getmtime(
@@ -264,6 +278,21 @@ class MainWindow(QMainWindow):
         # page 4
         self.ui.pushButton_MSure.clicked.connect(self.change_password)
         self.show()
+
+    def mousePressEvent(self, event):  # 检测点击的位置
+        self.m_Position = event.globalPos() - self.pos()  # 获取鼠标相对窗口的位置
+        if event.button() == Qt.LeftButton:
+            self.m_flag = True
+            event.accept()
+
+    def mouseMoveEvent(self, QMouseEvent):  # 拖动的函数
+        if Qt.LeftButton and self.m_flag:
+            self.setCursor(QCursor(Qt.OpenHandCursor))  # 更改鼠标图标
+            self.move(QMouseEvent.globalPos() - self.m_Position)  # 更改窗口位置
+            QMouseEvent.accept()
+
+    def mouseReleaseEvent(self, QMouseEvent):  # 释放的函数
+        self.setCursor(QCursor(Qt.ArrowCursor))
 
     def standard_CB1(self):
         level = self.ui.comboBox_1.currentText()
@@ -365,11 +394,11 @@ class MainWindow(QMainWindow):
             self.ui.lineEdit_CLOpen2.setText(self.directory)
 
     def update(self):
-        sm = standards_spider.Multi_Update
         # QMessageBox.warning(self, "提示", "功能研发中...")
         # 读取数据
-        self.fileName = r"D:/Users/weihao/OneDrive - hrbeu.edu.cn/05.Projects/02.Python/input.xlsx"
-        data = sm.read_data(self.fileName)
+        self.fileName = r"test\input.xlsx"
+        self.directory = r"test"
+        data = Multi_Update.read_data(self.fileName)
         self.ui.progressBar.setMaximum(
             len(data)) if data else QMessageBox.warning(self, "提示", "数据读取失败")
         # 查询数据
@@ -388,7 +417,9 @@ class MainWindow(QMainWindow):
                     if data[item] == sorted(res, key=lambda i: i[2])[-1][0]:
                         # 无更新
                         pass
-
+                    else:
+                        # 有更新
+                        pass
                 # print(cur.fetchall())
             except:
                 pass

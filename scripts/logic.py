@@ -7,18 +7,34 @@
 import pandas as pd
 from configparser import ConfigParser
 from PyQt5.QtWidgets import QMessageBox, QApplication
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon
 
 INI_PATH = r".\resources\config.ini"
 JSON_PATH = r".\resources\info.json"
 ICON_PATH = r".\resources\Logo.ico"
+DATABASE_PATH = r'.\database\users.db'
 
-
-class WindowAction():
-    '''窗口操作函数类'''
-    pass
-
+class DB_Action():
+    """ 
+    操作本地数据库
+    :param act_type:操作类型,增删改查,默认为查
+     """
+    def __init__(self, act_type=3, sql_query=None: list) -> None:
+        self.type = act_type
+        self.sql_query = sql_query
+    
+    def act(self)
+        conn = sqlite3.connect(DATABASE_PATH)
+        cur = conn.cursor()
+        if 
+        try:
+            cur.execute(self.sql_query)
+        except:
+            conn.commit()
+        finally:
+            conn.close()
+            
 class MyMessageBox(QMessageBox):
     '''定时关闭的提示框
     :param ICON:窗口的图标；
@@ -45,7 +61,6 @@ class MyConfigParser(ConfigParser):
     def optionxform(self, optionstr):
         '''重写类，取消大小写不敏感'''
         return optionstr
-
 
 class Setting():
     '''设置初始化等相关的函数类'''
@@ -76,26 +91,35 @@ class Setting():
         print('设置保存完毕！！！')
 
     def load_json():
+        """ 加载json文件 """
         return JSON_PATH
 
     def save_setting():
+        """ 保存设置 """
         return 1
 
-
-class Multi_Update():
+class Multi_Update(QThread):
     '''批量下载相关的函数类'''
-    def read_data(fileName):
-        df = pd.read_excel(fileName, sheet_name="Sheet1")
-        data = dict(zip(df.iloc[:, 1], df.iloc[:, 2]))
-        return data
+    status_signal = pyqtSignal(int)
+    def run(self):
+        self.read_data()
+        self.cpar_data()
+        self.dump_data()
+        self.status_signal.emit(i)
 
-    def wash_data(data):
-        soup = BeautifulSoup(data, 'lxml')
-        print(type(soup))
-        # with open('soup.text', 'w+', encoding='utf-8') as fp:
-        #     fp.write(str(soup))
-        print(soup.find_all('.*?<font color="#000000">(.*?)</font>.*?'))
+    def read_data(self, fileName):
+        """ 读取数据 """
+        # 默认读取第一个sheet，之后为了避免出现问题要做用户选择界面
+        self.df = pd.read_excel(fileName, sheet_name="Sheet1")
+        self.data = dict(zip(df.iloc[:, 1], df.iloc[:, 2]))
+    
+    def cpar_data(self):
+        """ 比对数据 """
+        pass
 
+    def dump_data(self) -> int:
+        """ 装载数据 """
+        pass
 
 class Utils():
     '''其他不便于归类的函数类'''

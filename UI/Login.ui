@@ -30,8 +30,11 @@
   </property>
   <property name="font">
    <font>
-    <family>幼圆</family>
-    <pointsize>14</pointsize>
+    <family>Noto Sans CJK</family>
+    <pointsize>10</pointsize>
+    <weight>50</weight>
+    <italic>false</italic>
+    <bold>false</bold>
    </font>
   </property>
   <property name="windowTitle">
@@ -41,6 +44,7 @@
    <string notr="true">border: 0px;
 padding: 0px;
 margin: 0px;
+font-size: 10pt;
 color: rgb(0, 0, 0);
 background-color: rgb(255, 255, 255);</string>
   </property>
@@ -49,13 +53,14 @@ background-color: rgb(255, 255, 255);</string>
     <string notr="true">#centralwidget{
 	background-color: rgb(255, 255, 255);
 	border-radius:20px;
-	margin: 5px;
 }
 
 QFrame,QLabel,QPushButton{
 	background-color: rgba(255, 0, 0, 0);
 }
-
+#label_title{
+	font-size: 40pt;
+}
 #frame_3{
 	margin: 30px;
 }</string>
@@ -126,8 +131,11 @@ QFrame,QLabel,QPushButton{
         <widget class="QLabel" name="label_title">
          <property name="font">
           <font>
-           <family>微软雅黑</family>
-           <pointsize>46</pointsize>
+           <family>Noto Sans CJK Medium</family>
+           <pointsize>40</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
           </font>
          </property>
          <property name="styleSheet">
