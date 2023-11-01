@@ -130,7 +130,7 @@ class Setting():
 class Multi_Update(QThread):
     '''批量更新线程函数类'''
     max_signal = pyqtSignal(int)
-    status_signal = pyqtSignal(int)
+    cur_signal = pyqtSignal(int)
     def __init__(self, fileName: str, directory: str) -> None:
         super(Multi_Update, self).__init__()
         self.fileName = fileName
@@ -140,11 +140,10 @@ class Multi_Update(QThread):
     def run(self):
         print('读取数据')
         self.read_data()
-        if self.data:
+        if not self.df.empty:
             print('比对数据')
-            self.max_signal.emit(len(self.data))
+            self.max_signal.emit(len(self.df))
             self.cpar_data()
-        if self.data_new:
             print('写入数据')
             self.dump_data()
 
@@ -155,7 +154,7 @@ class Multi_Update(QThread):
         # self.data = dict(zip(self.df.iloc[:, 1], self.df.iloc[:, 3]))
         # print(len(self.data))
         print(len(self.df))
-        print(self.df)
+        # print(self.df)
 
 
     def cpar_data(self):
@@ -163,6 +162,7 @@ class Multi_Update(QThread):
         # 查询数据
         for i, item in enumerate(self.df.iloc[:, 1]):
             # 数据库查询
+            self.cur_signal.emit(i)
             print(i, item, sep='')
             # self.status_signal.emit(i)
             # print(self.df.iloc[:, 3][1])     
@@ -189,10 +189,6 @@ class Multi_Update(QThread):
             except:
                 # 出错了
                 print('出错了')
-                
-            # if i > 10:
-            #     break
-        self.data_new = 1
 
     def dump_data(self) -> None:
         """ 装载数据 """

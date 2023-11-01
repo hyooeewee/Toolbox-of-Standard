@@ -23,18 +23,21 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">/* initialize element */
+   <string notr="true">/* define variable */
+
+/* initialize element */
 *{
-	border: 0px;
 	padding: 0px;
 	margin: 0px;
+	border: 0px;
+	border-radius: 4px;
 	font-size: 10pt;
 	color: rgb(0, 0, 0);
 	background-color: rgb(255, 255, 255);
 }
 QPushButton{
+	border: 1px solid rgb(219, 220, 222);
 	background-color: rgb(243, 243, 244);
-	border-radius: 4px;
 	padding: 8px;
 }
 QPushButton:hover{
@@ -64,6 +67,7 @@ QTableView{
 }
 QComboBox{
 	border: 1px solid rgb(219, 220, 222);
+	background-color: rgb(255, 255, 255);
 	border-radius: 4px;
 	padding: 4px;
 }
@@ -72,37 +76,37 @@ QProgressBar{
 	border-radius: 4px;
 }
 QFrame{
+	border-radius: 0px;
 	background-color: rgba(255, 255, 255, 0);
 }
 /* individual element */
 #centralwidget{
-	background-color: rgba(255, 0, 0, 0);
+	background-color:  rgba(255, 0, 0, 0);
 }
 #frame{
 	background-color: rgba(255, 255, 255, 1);
-	border: 1px solid rgba(219, 220, 222, 0.1);
+	border: 1px solid rgba(219, 220, 222, 0.5);
 	border-radius: 10px;
 }
-#frame_5 QWidget{
-	border-bottom-right-radius: 10px;
-}
 #frame_5 QPushButton{
-	background-color: rgba(57, 117, 198, 0);
-	color: rgb(0, 0, 0);
+	background-color: transparent;
 	border: none;
-	margin: none;
 	padding: none;
+	border-radius: 0px;
 }
 #frame_5 QPushButton:hover{	
 	background-color: rgb(230, 231, 232);
 }
-#frame_5 QPushButton #pushButton_close{
+#pushButton_close{
 	border-top-right-radius: 10px;
 }
 #frame_5 #pushButton_close:hover{
-	border: 0px;
 	border-top-right-radius: 10px;
 	background-color: rgb(240, 74, 62);
+}
+#stackedWidget .QWidget{
+	background-color: transparent;
+	border-bottom-right-radius: 10px;
 }
 #frame_8{
 	background-color: rgb(57, 117, 198);
@@ -538,7 +542,7 @@ QFrame{
              <string notr="true"/>
             </property>
             <property name="currentIndex">
-             <number>1</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="page_Home">
              <property name="sizePolicy">

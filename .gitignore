@@ -4,11 +4,14 @@
 /.vscode
 /logs
 /test
+/build
+/dist
 
 # file 不需要提交的文件
 .gitignore
 *.xmind
 *.pyc
+*.spec
 
 # 不忽略文件
 # !.gitignore

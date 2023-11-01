@@ -53,11 +53,11 @@ class LoginWindow(QMainWindow):
         self.setWindowFlag(Qt.FramelessWindowHint)  # 去掉外边框
         self.setAutoFillBackground(True)  # 一定要加上
         self.setAttribute(Qt.WA_TranslucentBackground)  # 窗口透明
-        self.shadow = QGraphicsDropShadowEffect()  # 创建阴影
-        self.shadow.setBlurRadius(5)  # 阴影模糊半径
-        self.shadow.setColor(QColor("#444444"))  # 设置颜色透明度为100的（0,0,0）黑色
-        self.shadow.setOffset(0, 5)  # 阴影的偏移值
-        self.setGraphicsEffect(self.shadow)  # 添加阴影
+        # self.shadow = QGraphicsDropShadowEffect()  # 创建阴影
+        # self.shadow.setBlurRadius(5)  # 阴影模糊半径
+        # self.shadow.setColor(QColor("#444444"))  # 设置颜色透明度为100的（0,0,0）黑色
+        # self.shadow.setOffset(0, 5)  # 阴影的偏移值
+        # self.setGraphicsEffect(self.shadow)  # 添加阴影
         self.setWindowIcon(QIcon(ICON_PATH))  # 设置标题栏logo为Logo.ico
         # myappid是一个占位符，后边可以改成需要的AppUserModelID替换，这个ID是win系统中应用程序的唯一识别码，用于在任务栏中的分组
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
@@ -380,12 +380,17 @@ class MainWindow(QMainWindow):
 
     def update(self):
         # QMessageBox.warning(self, "提示", "功能研发中...")
-        self.fileName = r"test\input.xlsx"
-        self.directory = r"test"
+        # self.fileName = r"test\input.xlsx"
+        # self.directory = r"test"
         self.t = Multi_Update(self.fileName, self.directory)
         self.t.max_signal.connect(lambda max: self.ui.progressBar.setMaximum(max))
-        self.t.status_signal.connect(lambda value: self.ui.progressBar.setValue(value))
+        self.t.cur_signal.connect(self.cur_status)
         self.t.start()
+    def cur_status(self, cur_value):
+        self.ui.progressBar.setValue(cur_value)
+        if cur_value + 1 == self.ui.progressBar.maximum():
+            MyMessageBox(QIcon(ICON_PATH), '提示', '更新完成！', 2000)
+            self.ui.progressBar.reset()
 
     def change_password(self):
         global UID
