@@ -9,6 +9,7 @@
 .gitignore
 *.xmind
 *.pyc
+*.spec
 
 # 不忽略文件
 # !.gitignore
