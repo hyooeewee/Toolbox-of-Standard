@@ -1,11 +1,9 @@
 # coding=utf-8
 from flask import Flask, jsonify, render_template
-#from py2neo import Graph
 from neo4j import GraphDatabase
-
 driver = GraphDatabase.driver("bolt://123.60.58.210:7687", auth=("neo4j", "12345678")) #认证连接数据库
-
 app = Flask(__name__) #flask框架必备
+
 def buildNodes(nodeRecord): #构建web显示节点
     data = {"id": nodeRecord._id, "label": list(nodeRecord._labels)[0]} #将集合元素变为list，然后取出值
     data.update(dict(nodeRecord._properties))
@@ -20,10 +18,18 @@ def buildEdges(relationRecord): #构建web显示边
 def index():
     return render_template('index.html')
 
-@app.route('/graph')#两个路由指向同一个网页，返回图的节点和边的结构体
+@app.route('/graph/')#两个路由指向同一个网页，返回图的节点和边的结构体
 def get_graph():
+    with open(r'.\WEB\templates\temp.txt','r', encoding='utf-8') as file:
+        file_contents = file.read()
+    # key = key.decode('utf-8')
+    print("----------------------------------")
+    print(file_contents)
+    print("------------------------------------------")
     with driver.session() as session:
-        results=session.run('MATCH  (p:STANDARD{name:"天津市钢桥面环氧沥青混凝土铺装施工技术规程"})-[r]->(n) RETURN p, r, n').values()
+        words = 'MATCH  (p:STANDARD{name:"' + file_contents + '"})-[r]->(n) RETURN p, r, n'
+        # print(words)8
+        results=session.run(words).values()
         nodeList=[]
         edgeList=[]
         for result in results:

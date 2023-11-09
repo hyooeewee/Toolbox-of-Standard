@@ -4,8 +4,10 @@
 /.vscode
 /logs
 /test
+/web/static/js/cytoscape
 
 # file 不需要提交的文件
+test.py
 .gitignore
 *.xmind
 *.pyc

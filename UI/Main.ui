@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1039</width>
-    <height>627</height>
+    <width>1113</width>
+    <height>629</height>
    </rect>
   </property>
   <property name="font">
@@ -23,21 +23,18 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">/* define variable */
-
-/* initialize element */
+   <string notr="true">/* initialize element */
 *{
+	border: 0px;
 	padding: 0px;
 	margin: 0px;
-	border: 0px;
-	border-radius: 4px;
 	font-size: 10pt;
 	color: rgb(0, 0, 0);
 	background-color: rgb(255, 255, 255);
 }
 QPushButton{
-	border: 1px solid rgb(219, 220, 222);
 	background-color: rgb(243, 243, 244);
+	border-radius: 4px;
 	padding: 8px;
 }
 QPushButton:hover{
@@ -67,7 +64,6 @@ QTableView{
 }
 QComboBox{
 	border: 1px solid rgb(219, 220, 222);
-	background-color: rgb(255, 255, 255);
 	border-radius: 4px;
 	padding: 4px;
 }
@@ -76,37 +72,37 @@ QProgressBar{
 	border-radius: 4px;
 }
 QFrame{
-	border-radius: 0px;
 	background-color: rgba(255, 255, 255, 0);
 }
 /* individual element */
 #centralwidget{
-	background-color:  rgba(255, 0, 0, 0);
+	background-color: rgba(255, 0, 0, 0);
 }
 #frame{
 	background-color: rgba(255, 255, 255, 1);
-	border: 1px solid rgba(219, 220, 222, 0.5);
+	border: 1px solid rgba(219, 220, 222, 0.1);
 	border-radius: 10px;
 }
+#frame_5 QWidget{
+	border-bottom-right-radius: 10px;
+}
 #frame_5 QPushButton{
-	background-color: transparent;
+	background-color: rgba(57, 117, 198, 0);
+	color: rgb(0, 0, 0);
 	border: none;
+	margin: none;
 	padding: none;
-	border-radius: 0px;
 }
 #frame_5 QPushButton:hover{	
 	background-color: rgb(230, 231, 232);
 }
-#pushButton_close{
+#frame_5 QPushButton #pushButton_close{
 	border-top-right-radius: 10px;
 }
 #frame_5 #pushButton_close:hover{
+	border: 0px;
 	border-top-right-radius: 10px;
 	background-color: rgb(240, 74, 62);
-}
-#stackedWidget .QWidget{
-	background-color: transparent;
-	border-bottom-right-radius: 10px;
 }
 #frame_8{
 	background-color: rgb(57, 117, 198);
@@ -299,31 +295,6 @@ QFrame{
             </property>
             <property name="text">
              <string>批量查询</string>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-            <property name="autoExclusive">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_Generate">
-            <property name="font">
-             <font>
-              <family>微软雅黑</family>
-              <pointsize>15</pointsize>
-              <weight>50</weight>
-              <italic>false</italic>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>目录生成</string>
             </property>
             <property name="checkable">
              <bool>true</bool>
@@ -542,7 +513,7 @@ QFrame{
              <string notr="true"/>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>4</number>
             </property>
             <widget class="QWidget" name="page_Home">
              <property name="sizePolicy">
@@ -925,6 +896,13 @@ QFrame{
                    </property>
                   </widget>
                  </item>
+                 <item>
+                  <widget class="QPushButton" name="pushButton_K">
+                   <property name="text">
+                    <string>知识图谱</string>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
                </widget>
               </item>
@@ -982,14 +960,14 @@ QFrame{
                 <attribute name="horizontalHeaderCascadingSectionResizes">
                  <bool>true</bool>
                 </attribute>
-                <attribute name="horizontalHeaderMinimumSectionSize">
-                 <number>25</number>
-                </attribute>
                 <attribute name="horizontalHeaderDefaultSectionSize">
                  <number>80</number>
                 </attribute>
                 <attribute name="horizontalHeaderHighlightSections">
                  <bool>true</bool>
+                </attribute>
+                <attribute name="horizontalHeaderMinimumSectionSize">
+                 <number>25</number>
                 </attribute>
                 <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
                  <bool>true</bool>
@@ -1346,7 +1324,7 @@ border: none;</string>
                    </item>
                    <item>
                     <property name="text">
-                     <string>工程建设标准化信息网</string>
+                     <string>住房城乡建设部</string>
                     </property>
                    </item>
                    <item>
@@ -1360,7 +1338,21 @@ border: none;</string>
                   <widget class="QFrame" name="frame_6">
                    <layout class="QHBoxLayout" name="horizontalLayout_11">
                     <item>
-                     <widget class="QDateEdit" name="dateEdit_3"/>
+                     <widget class="QDateEdit" name="dateEdit_3">
+                      <property name="dateTime">
+                       <datetime>
+                        <hour>0</hour>
+                        <minute>0</minute>
+                        <second>0</second>
+                        <year>2000</year>
+                        <month>1</month>
+                        <day>1</day>
+                       </datetime>
+                      </property>
+                      <property name="displayFormat">
+                       <string>yyyy年MM月dd日</string>
+                      </property>
+                     </widget>
                     </item>
                     <item>
                      <widget class="QLabel" name="label_5">
@@ -1370,7 +1362,11 @@ border: none;</string>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QDateEdit" name="dateEdit_4"/>
+                     <widget class="QDateEdit" name="dateEdit_4">
+                      <property name="displayFormat">
+                       <string>yyyy年MM月dd日</string>
+                      </property>
+                     </widget>
                     </item>
                    </layout>
                   </widget>
@@ -1384,7 +1380,7 @@ border: none;</string>
                     </size>
                    </property>
                    <property name="placeholderText">
-                    <string>请输入需要查询的新闻标题</string>
+                    <string>请输入需要查询的新闻标题，关键词用空格隔开</string>
                    </property>
                   </widget>
                  </item>
@@ -1405,11 +1401,18 @@ border: none;</string>
                    </property>
                   </widget>
                  </item>
+                 <item>
+                  <widget class="QPushButton" name="pushButton_NEWS">
+                   <property name="text">
+                    <string>新闻原文</string>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
                </widget>
               </item>
               <item>
-               <widget class="QTableWidget" name="tableWidget_News_2">
+               <widget class="QTableWidget" name="tableWidget_News">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
@@ -1456,20 +1459,23 @@ border: none;</string>
                 <property name="rowCount">
                  <number>0</number>
                 </property>
+                <property name="columnCount">
+                 <number>5</number>
+                </property>
                 <attribute name="horizontalHeaderVisible">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </attribute>
                 <attribute name="horizontalHeaderCascadingSectionResizes">
                  <bool>true</bool>
                 </attribute>
-                <attribute name="horizontalHeaderMinimumSectionSize">
-                 <number>25</number>
-                </attribute>
                 <attribute name="horizontalHeaderDefaultSectionSize">
-                 <number>80</number>
+                 <number>180</number>
                 </attribute>
                 <attribute name="horizontalHeaderHighlightSections">
                  <bool>true</bool>
+                </attribute>
+                <attribute name="horizontalHeaderMinimumSectionSize">
+                 <number>25</number>
                 </attribute>
                 <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
                  <bool>true</bool>
@@ -1513,6 +1519,11 @@ border: none;</string>
                 <column>
                  <property name="text">
                   <string>原文链接</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>文件号</string>
                  </property>
                 </column>
                </widget>

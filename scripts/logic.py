@@ -156,7 +156,6 @@ class Multi_Update(QThread):
         print(len(self.df))
         # print(self.df)
 
-
     def cpar_data(self):
         """ 比对数据 """
         # 查询数据
@@ -193,7 +192,6 @@ class Multi_Update(QThread):
     def dump_data(self) -> None:
         """ 装载数据 """
         self.df.to_excel(os.path.join(self.directory, r'output.xlsx'), index=None)
-
 
 class Utils():
     '''其他不便于归类的函数类'''
