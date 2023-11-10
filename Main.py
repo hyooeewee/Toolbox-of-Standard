@@ -14,7 +14,6 @@ import datetime
 import urllib
 import urllib.request
 import webbrowser
-
 import requests
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import Qt, QUrl, QThread, pyqtSignal, QDate
@@ -224,6 +223,8 @@ class MainWindow(QMainWindow):
             lambda: (self.ui.pushButton_back.show(), self.ui.pushButton_max.hide()))
         self.ui.pushButton_back.clicked.connect(
             lambda: (self.ui.pushButton_back.hide(), self.ui.pushButton_max.show()))
+        self.ui.pushButton_close.clicked.connect(self.K_background_end)
+        # self.ui.pushButton_close.connect()
         # page 1
         self.ui.label_LocalDB_V.setText(
             str(datetime.datetime.fromtimestamp(os.path.getmtime(
@@ -311,6 +312,9 @@ class MainWindow(QMainWindow):
 
     def search(self):
         self.tableWidget.clearSelection()
+        for row in range(self.ui.tableWidget.rowCount()):
+            for col in range(self.ui.tableWidget.columnCount()):
+                self.ui.tableWidget.setItem(row, col, None)
         level = self.ui.comboBox_1.currentText()
         state = self.ui.comboBox_2.currentText()
         status = self.ui.comboBox_3.currentText()
@@ -593,6 +597,11 @@ class MainWindow(QMainWindow):
 
     def onItemSelected(self):
         selected_items = self.tableWidget.selectedItems()
+        try:
+            self.WEB_engine.close()
+            self.WEB_engine = None
+        except:
+            print(1)
         if selected_items:
             # 获取第二列的数据
             row = selected_items[0].row()
@@ -602,10 +611,13 @@ class MainWindow(QMainWindow):
                 # 写入新内容
                 file.write(f'{second_column_data}')
 
-
     def K_background(self):
         process = multiprocessing.Process(target=worker_function)
         process.start()
+    def K_background_end(self):
+        if self.process and self.process.is_alive():
+            self.process.terminate()
+
 
 class WEB(QDialog):
     '''知识图谱WEB引擎'''
