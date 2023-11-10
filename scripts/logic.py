@@ -25,7 +25,7 @@ class DB_Action():
     操作本地数据库
     :param act_type:操作类型,增删改查,默认为查
     :param sql_chain:SQL的语句链,仅str支持fetchall
-     """
+    """
     def __init__(self, sql_chain: str|list, act_type=3) -> None:
         self.act_type = act_type
         self.sql_chain = sql_chain
@@ -143,6 +143,7 @@ class Multi_Update(QThread):
         if not self.df.empty:
             print('比对数据')
             self.max_signal.emit(len(self.df))
+            self.max_signal.emit(len(self.df))
             self.cpar_data()
             print('写入数据')
             self.dump_data()
@@ -193,7 +194,6 @@ class Multi_Update(QThread):
     def dump_data(self) -> None:
         """ 装载数据 """
         self.df.to_excel(os.path.join(self.directory, r'output.xlsx'), index=None)
-
 
 class Utils():
     '''其他不便于归类的函数类'''

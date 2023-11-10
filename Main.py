@@ -13,18 +13,22 @@ import os
 import datetime
 import urllib
 import urllib.request
-
+import webbrowser
+import requests
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtCore import Qt, QUrl, QThread, pyqtSignal
+from PyQt5.QtCore import Qt, QUrl, QThread, pyqtSignal, QDate
 from PyQt5.QtGui import QCursor, QIcon, QColor
 from PyQt5.QtWidgets import (
-    QApplication, QFileDialog, QMainWindow, QMessageBox, QTableWidgetItem, QGraphicsDropShadowEffect)
+    QApplication, QFileDialog, QMainWindow, QMessageBox, QTableWidgetItem, QGraphicsDropShadowEffect, QDialog,
+    QTableWidget)
 from UI.res_rc import *
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from scripts.download import *
 from scripts.logic import *
-from scripts.upload import *
-# from qframelesswindow import FramelessWindow
+from scripts.logic import *
+from scripts import News_Search
+from web import app
+import multiprocessing
 
 INI_PATH = r".\resources\config.ini"
 ICON_PATH = r".\resources\Logo.ico"
@@ -38,9 +42,9 @@ PROVINCE_CODE = []
 online_db_config = {
     'host': '123.60.58.210',  # 远程MySQL数据库的主机地址（IP地址或域名）
     'user': 'root',  # 远程MySQL数据库的用户名
-    'password': '123456',  # 远程MySQL数据库的密码
+    'password': 'CLFZZRe5Mn27w72y',  # 远程MySQL数据库的密码
     'database': 'standard_db',  # 要连接的数据库名称
-    'port': 3306  # MySQL默认端口号
+    'port': 5896  # MySQL默认端口号
 }
 
 class LoginWindow(QMainWindow):
@@ -184,6 +188,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         global PROVINCE_CODE
         super().__init__()
+
         self.m_flag = False
         self.ui = uic.loadUi(r'.\UI\Main.ui', self)  # 直接引用UI文件作为窗口
         self.setWindowFlag(Qt.FramelessWindowHint)  # 去掉外边框
@@ -206,8 +211,8 @@ class MainWindow(QMainWindow):
             lambda: self.ui.stackedWidget.setCurrentIndex(1))
         self.ui.pushButton_CheckList.clicked.connect(
             lambda: self.ui.stackedWidget.setCurrentIndex(2))
-        self.ui.pushButton_Generate.clicked.connect(
-            lambda: self.ui.stackedWidget.setCurrentIndex(3))
+        # self.ui.pushButton_Generate.clicked.connect(
+        #     lambda: self.ui.stackedWidget.setCurrentIndex(3))
         self.ui.pushButton_News.clicked.connect(
             lambda: self.ui.stackedWidget.setCurrentIndex(4))
         self.ui.pushButton_About.clicked.connect(
@@ -218,6 +223,8 @@ class MainWindow(QMainWindow):
             lambda: (self.ui.pushButton_back.show(), self.ui.pushButton_max.hide()))
         self.ui.pushButton_back.clicked.connect(
             lambda: (self.ui.pushButton_back.hide(), self.ui.pushButton_max.show()))
+        self.ui.pushButton_close.clicked.connect(self.K_background_end)
+        # self.ui.pushButton_close.connect()
         # page 1
         self.ui.label_LocalDB_V.setText(
             str(datetime.datetime.fromtimestamp(os.path.getmtime(
@@ -226,28 +233,45 @@ class MainWindow(QMainWindow):
         self.ui.label_OnlineDB_V.setText(self.online_db_version())
         self.ui.label_UserName.setText(str(USER))
         self.ui.pushButton_Export.clicked.connect(
-            self.show_confirmation_dialog)
+        self.show_confirmation_dialog)
         # page 2
+        self.K_background()
         self.ui.comboBox_1.currentIndexChanged.connect(self.standard_CB1)
         self.ui.comboBox_2.hide()
         self.ui.comboBox_2.addItems(['不限'] + [x[0] for x in PROVINCE_CODE])
-        self.ui.tableWidget.setColumnWidth(0, 160)
-        self.ui.tableWidget.setColumnWidth(1, 190)
-        self.ui.tableWidget.setColumnWidth(2, 100)
-        self.ui.tableWidget.setColumnWidth(3, 100)
-        self.ui.tableWidget.setColumnWidth(4, 60)
-        self.ui.tableWidget.setColumnWidth(5, 60)
         self.ui.tableWidget.horizontalHeader().setVisible(True)
         self.ui.pushButton_Search.clicked.connect(self.search)
         self.ui.tableWidget.resizeColumnsToContents()
         self.ui.tableWidget.resizeRowsToContents()
         self.ui.tableWidget.resizeColumnsToContents()
+        self.ui.tableWidget.setColumnWidth(0, 200)
+        self.ui.tableWidget.setColumnWidth(1, 190)
+        self.ui.tableWidget.setColumnWidth(2, 100)
+        self.ui.tableWidget.setColumnWidth(3, 100)
+        self.ui.tableWidget.setColumnWidth(4, 60)
+        self.ui.tableWidget.setColumnWidth(5, 60)
         self.ui.pushButton_DownLoad.clicked.connect(self.PDF_DOWNLOAD)
+        self.ui.pushButton_K.clicked.connect(self.toggle_new_dialog)
+        self.WEB_engine = None  # 用于跟踪新界面的状态
+        self.ui.tableWidget.setSelectionBehavior(QTableWidget.SelectRows)  # 设置选择整行
+        self.ui.tableWidget.itemSelectionChanged.connect(self.onItemSelected)  #传递表格变化的信号到槽函数
         # page 3
         self.ui.pushButton_CLOpen1.clicked.connect(self.select_file1)
         self.ui.pushButton_CLOpen2.clicked.connect(self.select_file2)
         self.ui.pushButton_Update.clicked.connect(self.update)
         # page 4
+        # page 5
+        self.ui.pushButton_Search_3.clicked.connect(self.News_Search)
+        self.ui.pushButton_NEWS.clicked.connect(self.open_News)
+        self.ui.dateEdit_4.setDate(QDate.currentDate())
+        self.ui.dateEdit_3.setDate(QDate.currentDate().addDays(-180))
+        self.ui.tableWidget_News.setColumnWidth(0, 400)
+        self.ui.tableWidget_News.setColumnWidth(1, 100)
+        self.ui.tableWidget_News.setColumnWidth(2, 100)
+        self.ui.tableWidget_News.setColumnWidth(3, 100)
+        self.ui.tableWidget_News.setColumnWidth(4, 200)
+
+        # page 6
         self.ui.pushButton_MSure.clicked.connect(self.change_password)
         self.show()
 
@@ -287,14 +311,16 @@ class MainWindow(QMainWindow):
             self.ui.comboBox_2.hide()
 
     def search(self):
+        self.tableWidget.clearSelection()
+        for row in range(self.ui.tableWidget.rowCount()):
+            for col in range(self.ui.tableWidget.columnCount()):
+                self.ui.tableWidget.setItem(row, col, None)
         level = self.ui.comboBox_1.currentText()
         state = self.ui.comboBox_2.currentText()
         status = self.ui.comboBox_3.currentText()
-
         def regexp(expr, result):
             reg = re.compile(expr)
             return reg.search(result) is not None
-
         conn = sqlite3.connect(DATABASE_PATH)
         cur = conn.cursor()
         pattarn = p1 = p2 = p3 = ''
@@ -344,6 +370,8 @@ class MainWindow(QMainWindow):
         conn.commit()
         conn.close()
         y = len(data)
+        if y < 17:
+            y = 17
         self.ui.tableWidget.setRowCount(y)
         for iy, i in enumerate(data):
             for ix, v in enumerate(i):
@@ -351,15 +379,45 @@ class MainWindow(QMainWindow):
                 self.ui.tableWidget.setItem(iy, ix, item)
         self.ui.tableWidget.resizeColumnsToContents()
         self.ui.tableWidget.resizeRowsToContents()
-        self.ui.tableWidget.setColumnWidth(0, 160)
-        self.ui.tableWidget.setColumnWidth(1, 190)
-        self.ui.tableWidget.setColumnWidth(2, 100)
-        self.ui.tableWidget.setColumnWidth(3, 100)
-        self.ui.tableWidget.setColumnWidth(4, 60)
-        self.ui.tableWidget.setColumnWidth(5, 60)
         for row in range(self.ui.tableWidget.rowCount()):
             self.ui.tableWidget.setRowHeight(row, 25)
+        if y == 1:
+            print(f"Selected second column data: {data[0][1]}")
+            with open(r'.\WEB\templates\temp.txt','w', encoding='utf-8') as file:
+                # 写入新内容
+                file.write(f'{data[0][1]}')
 
+    def News_Search(self):
+        self.tableWidget_News.clearSelection()
+        for row in range(self.ui.tableWidget_News.rowCount()):
+            for col in range(self.ui.tableWidget_News.columnCount()):
+                self.ui.tableWidget_News.setItem(row, col, None)
+        self.tableWidget_News.clearSelection()
+        level = self.ui.comboBox_6.currentText()
+        start_time = self.ui.dateEdit_3.date().toString(Qt.ISODate)
+        end_time = self.ui.dateEdit_4.date().toString(Qt.ISODate)
+        keyword = self.ui.lineEdit_Search_3.text()
+        News_result = News_Search.get_News(online_db_config,level,keyword,start_time,end_time)
+        y = len(News_result)
+        if y < 17:
+            y = 17
+        self.ui.tableWidget_News.setRowCount(y)
+        try:
+            for row in range(len(News_result)):
+                self.ui.tableWidget_News.setItem(row, 0, QTableWidgetItem(News_result[row][1]))
+                self.ui.tableWidget_News.setItem(row, 1, QTableWidgetItem(News_result[row][2]))
+                self.ui.tableWidget_News.setItem(row, 2, QTableWidgetItem(News_result[row][0]))
+                self.ui.tableWidget_News.setItem(row, 3, QTableWidgetItem(News_result[row][3]))
+                self.ui.tableWidget_News.setItem(row, 4, QTableWidgetItem(News_result[row][4]))
+        except Exception as e:
+            print(f"An exception occurred: {e}")
+
+    def open_News(self):
+        selected_items = self.tableWidget_News.selectedItems()
+        if selected_items:
+            row = selected_items[0].row()
+            url = self.tableWidget_News.item(row, 3).text()
+            webbrowser.open(url)
     def select_file1(self):
         # 调用QFileDialog.getOpenFileName方法，弹出文件选择窗口
         # 参数依次为：父窗口、标题、默认目录、文件类型过滤器、选项
@@ -515,7 +573,64 @@ class MainWindow(QMainWindow):
             desktop_path = None
         return desktop_path
 
+    def toggle_new_dialog(self):
+        try:
+            if self.WEB_engine is None:
+                selected_items = self.tableWidget.selectedItems()
+                if selected_items:
+                    # 如果新界面未显示，创建并显示它
+                    url = f'http://127.0.0.1:5000/'
+                    response = requests.get(url)
+                    self.WEB_engine = WEB(self)
+                    self.WEB_engine.show()
 
+            else:
+                # 如果新界面已显示，关闭它并设置状态为None
+                self.WEB_engine.close()
+                self.WEB_engine = None
+        except Exception as e:
+            print(f"An exception occurred: {e}")
+
+    def moveEvent(self, event):
+        for WEB_engine in self.findChildren(WEB):
+            WEB_engine.move(self.geometry().right() + 10, self.geometry().top())
+
+    def onItemSelected(self):
+        selected_items = self.tableWidget.selectedItems()
+        try:
+            self.WEB_engine.close()
+            self.WEB_engine = None
+        except:
+            print(1)
+        if selected_items:
+            # 获取第二列的数据
+            row = selected_items[0].row()
+            second_column_data = self.tableWidget.item(row, 1).text()
+            print(f"Selected second column data: {second_column_data}")
+            with open(r'.\WEB\templates\temp.txt','w', encoding='utf-8') as file:
+                # 写入新内容
+                file.write(f'{second_column_data}')
+
+    def K_background(self):
+        process = multiprocessing.Process(target=worker_function)
+        process.start()
+    def K_background_end(self):
+        if self.process and self.process.is_alive():
+            self.process.terminate()
+
+
+class WEB(QDialog):
+    '''知识图谱WEB引擎'''
+    def __init__(self, parent):  # 将parent参数设置为默认值为None
+        super().__init__(parent)
+        if parent:
+            self.ui = uic.loadUi(r'.\UI\WEB.ui', self)  # 直接引用UI文件作为窗口
+            self.setWindowFlag(Qt.FramelessWindowHint)  # 去掉外边框
+            self.setGeometry(parent.geometry().right() + 5, parent.geometry().top(), 630, 480)
+            self.webEngineView.setUrl(QUrl("http://127.0.0.1:5000/"))
+
+def worker_function():
+    app.app.run(debug=None)
 def source_path(relative_path):
     # 是否Bundle Resource
     if getattr(sys, 'frozen', False):
@@ -533,4 +648,5 @@ if __name__ == "__main__":
     # Setting.load_json()
     app = QApplication(sys.argv)
     win = LoginWindow()
-    sys.exit(app.exec_())
+    sys.exit(app.exec_())# 运行应用程序的主事件循环
+
