@@ -11,11 +11,11 @@ import sqlite3
 
 DATABASE_PATH = r'.\database\users.db'
 online_db_config = {
-    'host': '123.60.58.210',  # 远程MySQL数据库的主机地址（IP地址或域名）
-    'user': 'root',  # 远程MySQL数据库的用户名
-    'password': '123456',  # 远程MySQL数据库的密码
-    'database': 'standard_db',  # 要连接的数据库名称
-    'port': 3306  # MySQL默认端口号
+    "host": "123.60.58.210",  # 远程MySQL数据库的主机地址（IP地址或域名）
+    "user": "root",  # 远程MySQL数据库的用户名
+    "password": "CLFZZRe5Mn27w72y",  # 远程MySQL数据库的密码
+    "database": "standard_db",  # 要连接的数据库名称
+    "port": 5896,  # MySQL默认端口号
 }
 
 class DB_update(QThread):
